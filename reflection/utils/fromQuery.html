@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+Formato de objetos privados: a\b<br>
+Ejemplo de query: SELECT id_bag,id_bag_request FROM bag  WHERE [%dyn_id_bag:id_bag LIKE '{%dyn_id_bag%}%'%]
+<form method="POST" action="reflectionUtils.php?action=fromQuery">
+    <table border=1>
+        <tr>
+            <td>Name::</td>
+            <td><input type="text" name="name"></td>
+        </tr>
+        <tr>
+            <td>Objeto:</td>
+            <td><input type="text" name="object"></td>
+        </tr>
+        <tr>
+            <td>Query:</td>
+            <td><textarea name="query"></textarea></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Aceptar"></td>
+        </tr>
+</form>
+
+</body>
+</html>

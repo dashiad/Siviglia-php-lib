@@ -1,0 +1,25 @@
+a:2:{s:4:"data";a:2:{s:6:"header";s:654:"<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!-- @@BEGIN:metas@@ -->
+    <meta name="title" value="[%title%]">
+    <meta name="description" value="[%description%]">
+    <!-- @@END:metas@@ -->
+    <script>
+        var coms_1='';
+        var coms_2='[%coms2:{%coms2:strtoupper%}%][%!coms2:Valor por defecto%]';
+    </script>
+    <!-- @@BEGIN:scripts@@ -->
+    <script src="aa.html"></script>
+    <!-- @@END:scripts@@ -->
+    <!-- @@BEGIN:css@@ -->
+    <link type="text/css" href="http://www.abc.es/css/estilosabc.css?v=38" rel="stylesheet" media="screen"/>
+    <!-- @@END:css@@ -->
+
+</head>
+<body>
+    <div class="bodyStart">";s:6:"footer";s:26:"</div>
+
+</body>
+</html>";}s:7:"expires";i:1445498952;}

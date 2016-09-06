@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<noticia xmlns:dt="urn:schemas-microsoft-com:datatypes" version="2015" tipo="Normal">
+    <noticiaid>1622148555331</noticiaid>
+    <!--
+    /abc/abcnacional/noticias/201510/06/cultura/eurovision-il-volo.xml
+    -->
+    <objpublishid>cultura</objpublishid>
+    <originalid>16.2.2148555331</originalid>
+    <path>
+        http://new.abc.es/cultura/abci-rata-nariz-cerdo-nueva-especie-hallada-indonesia-201510061729_noticia.html
+    </path>
+    <canonical>
+        http://new.abc.es/cultura/abci-rata-nariz-cerdo-nueva-especie-hallada-indonesia-201510061729_noticia.html
+    </canonical>
+    <alternate>
+        http://new.m.abc.es/cultura/abci-rata-nariz-cerdo-nueva-especie-hallada-indonesia-201510061729_noticia.html
+    </alternate>
+    <urls_noticia>
+        <url>
+            /cultura/abci-rata-nariz-cerdo-nueva-especie-hallada-indonesia-201510061729_noticia.html
+        </url>
+    </urls_noticia>
+    <!-- Directo (nodes):      0 -->
+    <!-- Directo (paragraphs): 0 -->
+    <!-- Cronica (nodes):      0 -->
+    <!-- Cronica (paragraphs): 0 -->
+    <!-- Previa (nodes):       0 -->
+    <!-- Previa (paragraphs):  0 -->
+    <genero>articulo-entrevista</genero>
+    <cargo>
+        <![CDATA[ ]]>
+    </cargo>
+    <include_path>/2015/includes_m/cultura/</include_path>
+    <OAS_Sitepage>/cultura//portada</OAS_Sitepage>
+    <OAS_Movil/>
+    <fecha>06-10-2015</fecha>
+    <hora dt:dt="time">17:29:46</hora>
+    <fechamodificacion>10-10-2015</fechamodificacion>
+    <horamodificacion dt:dt="time">13:09:23</horamodificacion>
+    <comentarios>1</comentarios>
+    <titulo>
+        <![CDATA[
+Amanecer nublado para Edurne en Eurovisión; Suecia gana el festival
+]]>
+    </titulo>
+    <antetitulo>
+        <![CDATA[ EUROVISIÓN 2015 ]]>
+    </antetitulo>
+    <antetitulo_titulo/>
+    <entradillas>
+        <entradilla>
+            <![CDATA[
+La representante española no pasa del vigésimo primer puesto y sólo recibe votos de ocho países
+]]>
+        </entradilla>
+        <entradilla>
+            <![CDATA[
+Måns Zelmerlöw consigue el sexto triunfo para los suecos con «Heroes»
+]]>
+        </entradilla>
+        <entradilla>
+            <![CDATA[
+Rusia e Italia completan el pódium. Bélgica y Letonia, las grandes sorpresas de la noche
+]]>
+        </entradilla>
+    </entradillas>
+    <firma>
+        <![CDATA[ JAVIER ESCARTÍN ]]>
+    </firma>
+    <autores>
+        <autor>
+            <firma>
+                <![CDATA[ JAVIER ESCARTÍN ]]>
+            </firma>
+            <twitter>
+                <![CDATA[ jescartinabc ]]>
+            </twitter>
+            <google-plus>
+                <![CDATA[ ]]>
+            </google-plus>
+            <linkedin>
+                <![CDATA[ ]]>
+            </linkedin>
+            <web>
+                <![CDATA[ ]]>
+            </web>
+        </autor>
+    </autores>
+    <lugares>
+        <lugar>
+            <name>
+                <![CDATA[ ENVIADO ESPECIAL A ESTOCOLMO ]]>
+            </name>
+        </lugar>
+    </lugares>
+    <autor_methode>
+        <![CDATA[ ]]>
+    </autor_methode>
+    <includes_movil>
+        <include_marcador_portada/>
+        <include_marcador_noticia/>
+        <include_marcador/>
+        <include_campo/>
+        <include_narracion/>
+    </includes_movil>
+    <cuerpo>
+        <![CDATA[
+<p>Esperando el amanecer se nos volvió a hacer de noche. Edurne, la representante de España este año en el festival de Eurovisión, no pudo evitar que se repitiera la misma historia de siempre. El tortuoso camino de <a href="http://laguiatv.abc.es/programacion/tve-1-807.html">TVE</a> en el certamen, donde no gana desde hace 46 años, suma <strong>un nuevo eurodrama después de que la artista madrileña no superara la vigésimo primera plaza en la gran final del concurso que se celebró anoche en el Stadthalle de Viena</strong>. De nada sirvieron los trucos de cambio de vestuario y acrobacias imposibles sobre el escenario, la correcta actuación de Edurne o contar entre los autores de la canción con el creador de la ganadora y famosísima «Euphoria» (Suecia, 2012). [<a href="http://new.abc.es/fotos-laguiatv/20150523/mejores-imagenes-festival-eurovision-1621103999073.html">Vea las mejores fotos de la final de Eurovisión</a>]</p> <blockquote class="azul-ultra-oscuro"> <span class="fa fa-quote-left gris-claro"> </span>El «Amanecer» de Edurne sólo vio la luz en ocho países</blockquote> <p>El «Amanecer» de Edurne sólo vio la luz en ocho países: Francia (5 puntos), Portugal (3), Montenegro (2), Moldavia (1), Azerbaiyán (1), Suiza (1), Israel (1) y Rusia (1), Ni siquiera Reino Unido, país en el que el novio de Edurne, David De Gea, juega como portero del Manchester United, se acordó de la guapa rubia. Y todo pese a que España llegó a la hora de la final rozando el top10 en las casas de apuestas y <strong>la actuación recibió un sonoro aplauso por parte de los más de diez mil eurofans que asistieron a la gran gala</strong>. Inyección de optimismo que no encontró respuesta entre los portavoces de los 40 países en el momento de dar los puntos.</p> <aside class="remision-galeria bg-gris-ultra-claro"> <h1 class="gris-ultra-oscuro">Galería de imágenes<span class="icono-imagen bg-azul-ultra-oscuro blanco"/> </h1><ul class="clear"> <li> <a href="http://new.abc.es/deportes/abci-premier-league-chelsea-southampton-1622142334766-20151005220542_galeria.html" title="Premier League: Chelsea-Southampton"> <img src="http://resizer.abc.es/resizer/resizer.php?imagen=http://new.abc.es/media/MM/2015/10/05/A1-47039036_xoptimizadax.jpg&amp;nuevoancho=157&amp;medio=abc" class="resize-img" alt=" "/> </a> </li> <li> <a href="http://new.abc.es/deportes/abci-premier-league-chelsea-southampton-1622142334766-20151005220542_galeria.html" title="Premier League: Chelsea-Southampton"> <img src="http://resizer.abc.es/resizer/resizer.php?imagen=http://new.abc.es/media/MM/2015/10/05/46887646_xoptimizadax.jpg&amp;nuevoancho=157&amp;medio=abc" class="resize-img" alt=" "/> </a> </li> <li> <a href="http://new.abc.es/deportes/abci-premier-league-chelsea-southampton-1622142334766-20151005220542_galeria.html" title="Premier League: Chelsea-Southampton"> <img src="http://resizer.abc.es/resizer/resizer.php?imagen=http://new.abc.es/media/MM/2015/10/05/A1-46887780_xoptimizadax.jpg&amp;nuevoancho=157&amp;medio=abc" class="resize-img" alt=" "/> </a> </li> </ul> <footer> <a title="Premier League: Chelsea-Southampton" href="http://new.abc.es/deportes/abci-premier-league-chelsea-southampton-1622142334766-20151005220542_galeria.html" class="alter"> Vea la galer&iacute;a completa (4 im&aacute;genes) </a> </footer></aside> <div class="robapaginas bg-gris-claro"> <div id="roba_cintillo"><span class="bg-gris-claro rojo-medio">Publicidad</span><span class="roba" id="roba_cintillo-id"><script>ads.printAds({'position': 'roba_cintillo', 'id': 'roba_cintillo'});</script></span> </div> </div> <p> <a href="http://new.abc.es/eurovision/20150523/abci-eurovision-edurne-actuacion-201505231044.html">Una Edurne épica y de cuento apostó por una puesta en escena muy teatral, envolvente y mágica</a> para conquistar a los espectadores. <strong>El recuerdo de un amor perdido, eje central de la escenografía, permitió a la artista madrileña valerse de elementos místicos y fondos que reflejaban mundos irreales para impregnar de mucho simbolismo su candidatura</strong>. Edurne, como siempre, deslumbró con su belleza durante su actuación. Al principio del tema, apareció envuelta por una capa roja realizada en punto de seda y paillette libanés obra de José Fuentes. Tras el primer estribillo, y como símbolo de la liberación que su personaje sentía al dejar atrás su pasado, se despojó de la capa para lucir un vestido verdoso, brillante y semitransparente de estilo helénico también del mismo diseñador. La prenda ensalzaba la feminidad de Edurne con una larguísima abertura lateral y una cintura muy marcada. La intérprete, vocalmente muy correcta, obtuvo un gran aplauso por parte de los miles de eurofans al final de la actuación y <strong>su emoción fue tal que no pudo evitar derramar una lágrima.</strong> </p><iframe width="478" height="270" src="https://www.youtube.com/embed/5sGOwFVUU0I" frameborder="0" allowfullscreen></iframe> <p>«Debería haber quedado más arriba, los europeos tendrían que haber valorado mejor nuestro trabajo», aseguró la «extriunfita» ante los medios desplazados a Viena poco después de concluir la ceremonia. Pese a todo, se mostró «feliz y contenta» por la labor realizada desde que en enero TVE la designara como representante de España en el concurso. «Me siento ganadora con la reacción del público y con todo el apoyo que he recibido».</p> <h2>Suecia vuelve a reinar en Europa</h2> <p>La gloria viajó anoche de nuevo a los países escandinavos. El sueco Måns Zelmerlöw cumplió con los pronósticos y se convirtió en el gran triunfador de Eurovisión con «Heroes», pegadiza propuesta pop adornada con una puesta en escena resultona que incluye una animación donde el artista interactúa con un muñeco. <strong>Todo para que el intérprete contara los problemas que tenía para hacer amigos durante su niñez</strong>. «Había un matón en nuestra clase que me acosaba y volvió en mi contra a mis antiguos amigos. Pasaron unos dos años hasta que un chico de otro colegio llegó a mi aula y me devolvió la confianza. Y de eso va la interpretación realmente: este muñequito se supone que soy, que me simboliza a mí cuando era niño, y yo soy ese amigo que me hizo más fuerte. Todos podemos ser héroes y defender al débil», comentaba el artista.</p> <figure class="foto-intercalada-izquierda"> <img class="resize-img" src="/media/ciencia/2015/10/06/43915778--250x140.jpg" alt="Måns Zelmerlöw ganó gracias a los votos del jurado"/> <figcaption class="pie-foto gris-oscuro bg-gris-ultra-claro">Måns Zelmerlöw ganó gracias a los votos del jurado<span class="gris-medio">- AFP</span> </figcaption> </figure> <p>Su mensaje contra el bullying ha prevalecido sobre las acusaciones de plagio que desde un primer momento han perseguido a su candidatura.Su parecido con el hit «Lovers on the sun» de David Guetta y una puesta en escena excesivamente «inspirada» en un videoclip de Dandypunk ha provocado que hasta rivales del sueco, como el sanmarinense Michel Perniola, le reprocharan no llevar una propuesta absolutamente original como el resto de los participantes.</p> <p>Suecia consigue así el sexto triunfo de su historia y se queda a uno de Irlanda, el país que más veces ha ganado el festival en los sesenta años de certamen.</p> <h2>Miedo a la victoria de Rusia</h2> <p>La victoria sueca supuso un <strong>gran alivio para parte de los seguidores del festival, que en algunos tramos de la noche vieron cómo Rusia amenazaba con llevarse el concurso</strong>. Polina Gagarina, con «A million voices», recibió el apoyo mayoritario de los países del este. Su desgaste conforme avanzaba la votación fue celebrado con vítores ante el temor de algunos a viajar a un país que limita las libertades de homosexuales.<strong> El trío lírico italino «Il Volo», que partía en el grupo de los favoritos, tuvo que conformarse con el bronce</strong>. Los tenores Piero Barone e Ignazio Boschetto y el barítono Gianluca Ginoble, todos ellos con edades comprendidas entre los 20 y los 22 años, emocionaron con una actuación sobria pero elegantísima de «Grande amore», el tema con el que ganaron en el último festival de Sanremo y que les ha convertido en la actual sensación musical de su país.</p> <figure class="foto-intercalada"> <img class="resize-img" src="/media/ciencia/2015/10/06/43806466--510x286.jpg" alt="Polina Gagarina interpretó la canción «A million voices»"/> <figcaption class="pie-foto gris-oscuro bg-gris-ultra-claro">Polina Gagarina interpretó la canción «A million voices»<span class="gris-medio">- AFP</span> </figcaption> </figure> <p>Australia, que competía por primera vez en el concurso, cerró su debut en el quinto puesto gracias a Guy Sebastian y su «Tonight Again».<strong> El belga Loïc Nottet y la letona Aminata, en cuarta y sexta posición respectivamente, fueron las grandes sorpresas</strong> de una gala que también contó con un beso gay entre los coristas de Lituania, un «selfie» del equipo israelí tras su actuación y un piano en llamas en la canción de los anfitriones. Esto último, sin embargo, <strong>no evitó que Austria se quedará sin puntos en la final al igual que Alemania</strong>.</p> <blockquote class="azul-ultra-oscuro literal"> <span class="fa fa-quote-left gris-claro"> </span>«Estoy muy contento por el triunfo». ¡El año que viene nos vemos en Estocolmo! <span class="atribucion gris-medio">Måns Zelmerlöw</span> </blockquote> <p>Tampoco faltaron las actuaciones con mensaje. Fue el caso de Armenia, participando con una canción que supuestamente aludía a la masacre otomana de armenios en la I Guerra Mundial y que Turquía niega que fuera un genocidio. Más optimista fue la polaca Monika Kuszynska, la primera cantante en silla de ruedas en Eurovisión, y que con su «In the name of love» quiso transmitir que cualquier obstáculo que te ponga la vida se puede superar. El grupo rumano Voltaj, mientras, apeló a la emoción hablando en su canción de la soledad que sufren los niños cuyos padres tienen que emigrar a otros países para buscar trabajo.</p> <h2>Conchita Wurst cede el trono</h2> <p>Pese a no competir este año, Conchita Wurst ha seguido acaparando buena parte del foco mediático en Eurovisión. <strong>«La mujer barbuda» abrió el show elevándose a los cielos ante el júbilo de los espectadores del Stadthalle de Viena</strong>. En su papel de presentadora, derrochó complicidad y simpatía con los candidatos en sus últimas horas de reinado. Ahora, tendrá que seguir su carrera musical fuera de la expectación que genera ocupar el trono eurovisivo. La reina Suecia vuelve a gobernar Europa y Måns Zelmerlöw ya está al mando.</p> <p> <span class="azul-ultra-oscuro">- ¿Cómo te sientes tras ganar el festival?</span> <br/>Muy emocionado. ¡No me lo puedo creer! </p>
+]]>
+    </cuerpo>
+    <cronica>
+        <nombre>
+            <![CDATA[ Crónica ]]>
+        </nombre>
+        <texto>
+            <![CDATA[ ]]>
+        </texto>
+    </cronica>
+    <directo>
+        <nombre>
+            <![CDATA[ Directo ]]>
+        </nombre>
+        <texto>
+            <![CDATA[ ]]>
+        </texto>
+    </directo>
+    <previa>
+        <nombre>
+            <![CDATA[ Previa ]]>
+        </nombre>
+        <texto>
+            <![CDATA[ ]]>
+        </texto>
+    </previa>
+    <elementos/>
+    <horatitulo>1</horatitulo>
+    <imageFile>
+        /media/ciencia/2015/10/06/suecia-eurovision--620x349.jpg
+    </imageFile>
+    <imageType>jpg</imageType>
+    <imageFilethn>thumbnail</imageFilethn>
+    <imageFirma>
+        <![CDATA[ ]]>
+    </imageFirma>
+    <imageAlt>
+        <![CDATA[ ]]>
+    </imageAlt>
+    <imageFoot>
+        <![CDATA[ ]]>
+    </imageFoot>
+    <image_is_from_agency>0</image_is_from_agency>
+    <video>
+        <![CDATA[ ]]>
+    </video>
+    <audio/>
+    <object>
+        <![CDATA[ ]]>
+    </object>
+    <carrusel>
+        <tipo_carrusel>4c</tipo_carrusel>
+        <width_carrusel>620</width_carrusel>
+        <image>
+            <imageFile>
+                /media/ciencia/2015/10/06/suecia-eurovision--620x349.jpg
+            </imageFile>
+            <imageType>jpg</imageType>
+            <imageFilethn>thumbnail</imageFilethn>
+            <imageFirma>
+                <![CDATA[ ]]>
+            </imageFirma>
+            <imageAlt>
+                <![CDATA[ ]]>
+            </imageAlt>
+            <imageFoot>
+                <![CDATA[ ]]>
+            </imageFoot>
+            <image_is_from_agency>0</image_is_from_agency>
+            <video>
+                <![CDATA[ ]]>
+            </video>
+            <audio/>
+            <object>
+                <![CDATA[ ]]>
+            </object>
+        </image>
+    </carrusel>
+    <carrusel>
+        <tipo_carrusel>3c</tipo_carrusel>
+        <width_carrusel>478</width_carrusel>
+    </carrusel>
+    <galerias>
+        <galeria/>
+    </galerias>
+    <links>
+        <linkname>Noticias relacionadas</linkname>
+        <link>
+            <linktitular>
+                <![CDATA[
+«Rata nariz de cerdo», una nueva especie hallada en Indonesia
+]]>
+            </linktitular>
+            <linkurl>
+                /ciencia/abci-rata-nariz-cerdo-nueva-especie-hallada-indonesia-201510060903_noticia.html
+            </linkurl>
+            <imageFile>
+                /media/ciencia/2015/10/06/rata-nariz-cerdo--300x168.jpg
+            </imageFile>
+            <imageAlt>
+                <![CDATA[
+Fotografía cedida por el Museo Victoria de Australia
+]]>
+            </imageAlt>
+        </link>
+        <link>
+            <linktitular>
+                <![CDATA[
+Todo preparado para los mayores «fuegos artificiales» de la galaxia
+]]>
+            </linktitular>
+            <linkurl>
+                /ciencia/abci-galaxia-fuegos-artificiales-201510061114_noticia.html
+            </linkurl>
+            <imageFile>
+                /media/ciencia/2015/10/06/colision-estelar--300x168.jpg
+            </imageFile>
+            <imageAlt>
+                <![CDATA[
+Todo preparado para los mayores «fuegos artificiales» de la galaxia
+]]>
+            </imageAlt>
+        </link>
+    </links>
+    <links>
+        <linkname>Enlaces</linkname>
+    </links>
+    <fuente>RL</fuente>
+    <keywords>amanecer, nublado, para, edurne, eurovision</keywords>
+    <origen>actualidad</origen>
+    <publicar>1</publicar>
+    <kioskoymas>0</kioskoymas>
+    <borrado>No</borrado>
+    <edicion>abc</edicion>
+    <seccion>Cultura</seccion>
+    <IdSeccion>5</IdSeccion>
+    <nom_seccion>cultura</nom_seccion>
+    <paquete>Cultura</paquete>
+    <IdPaquete>505</IdPaquete>
+    <nom_paquete>cultura</nom_paquete>
+    <tipo>
+        <![CDATA[ noticia ]]>
+    </tipo>
+    <tags>
+        <![CDATA[ amanecer, nublado, para, edurne, eurovision ]]>
+    </tags>
+    <medio>
+        <![CDATA[ Methode ]]>
+    </medio>
+    <topics/>
+    <num_fotos>
+        <lead>
+            <total>4</total>
+            <column>
+                <name>colABC</name>
+                <num>1</num>
+            </column>
+            <column>
+                <name>colAB</name>
+                <num>1</num>
+            </column>
+            <column>
+                <name>colA</name>
+                <num>1</num>
+            </column>
+            <column>
+                <name>colB</name>
+                <num>0</num>
+            </column>
+            <column>
+                <name>colC</name>
+                <num>1</num>
+            </column>
+        </lead>
+        <story>
+            <total>3</total>
+            <column>
+                <name>principal</name>
+                <num>1</num>
+            </column>
+            <column>
+                <name>cuerpo</name>
+                <num>2</num>
+            </column>
+        </story>
+    </num_fotos>
+    <num_videos>
+        <lead>
+            <total>0</total>
+            <column>
+                <name>colABC</name>
+                <num>0</num>
+            </column>
+            <column>
+                <name>colAB</name>
+                <num>0</num>
+            </column>
+            <column>
+                <name>colA</name>
+                <num>0</num>
+            </column>
+            <column>
+                <name>colB</name>
+                <num>0</num>
+            </column>
+            <column>
+                <name>colC</name>
+                <num>0</num>
+            </column>
+        </lead>
+        <story>
+            <total>0</total>
+            <column>
+                <name>principal</name>
+                <num>0</num>
+            </column>
+            <column>
+                <name>cuerpo</name>
+                <num>0</num>
+            </column>
+        </story>
+    </num_videos>
+    <geolocalizacion>
+        <latitud>
+            <![CDATA[ ]]>
+        </latitud>
+        <longitud>
+            <![CDATA[ ]]>
+        </longitud>
+    </geolocalizacion>
+    <icono tipo=""/>
+    <colC>
+        <aside>
+            <name>claves</name>
+            <title>
+                <![CDATA[ Las Claves ]]>
+            </title>
+            <ul>
+                <li>
+                    <![CDATA[
+Australia debutó con un quinto puesto gracias a Guy Sebastian y su canción «Tonight again»
+]]>
+                </li>
+                <li>
+                    <![CDATA[
+Austria y Alemania fracasan tras quedarse con cero puntos
+]]>
+                </li>
+                <li>
+                    <![CDATA[
+Estocolmo, posible sede del festival de Eurovisión 2016
+]]>
+                </li>
+            </ul>
+        </aside>
+        <aside>
+            <name>related-stories</name>
+            <title>
+                <![CDATA[ Contenidos relacionados ]]>
+            </title>
+            <link>
+                <linktitular>
+                    <![CDATA[
+«Rata nariz de cerdo», una nueva especie hallada en Indonesia
+]]>
+                </linktitular>
+                <linkurl>
+                    /ciencia/abci-rata-nariz-cerdo-nueva-especie-hallada-indonesia-201510060903_noticia.html
+                </linkurl>
+                <imageFile>
+                    /media/ciencia/2015/10/06/rata-nariz-cerdo--300x168.jpg
+                </imageFile>
+                <imageAlt>
+                    <![CDATA[
+Fotografía cedida por el Museo Victoria de Australia
+]]>
+                </imageAlt>
+            </link>
+            <link>
+                <linktitular>
+                    <![CDATA[
+Todo preparado para los mayores «fuegos artificiales» de la galaxia
+]]>
+                </linktitular>
+                <linkurl>
+                    /ciencia/abci-galaxia-fuegos-artificiales-201510061114_noticia.html
+                </linkurl>
+                <imageFile>
+                    /media/ciencia/2015/10/06/colision-estelar--300x168.jpg
+                </imageFile>
+                <imageAlt>
+                    <![CDATA[
+Todo preparado para los mayores «fuegos artificiales» de la galaxia
+]]>
+                </imageAlt>
+            </link>
+        </aside>
+    </colC>
+    <comscore>
+        <voc_site/>
+        <voc_ed/>
+        <voc_at/>
+        <voc_se>cultura</voc_se>
+        <voc_s1/>
+        <voc_s2/>
+        <voc_s3/>
+        <voc_s4/>
+        <voc_tc>noticia</voc_tc>
+        <voc_tn>
+            amanecer-nublado-para-edurne-en-eurovision-suecia-gana-el-festival
+        </voc_tn>
+        <voc_au>
+            javier-escartin_efe_abces_jose-manuel-nieves_unai-mezcua
+        </voc_au>
+        <voc_or>RL</voc_or>
+        <voc_fep>20151006163723</voc_fep>
+        <voc_fem>20151010130923</voc_fem>
+        <voc_pr>1</voc_pr>
+    </comscore>
+</noticia>
