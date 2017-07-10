@@ -313,7 +313,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
         $q1->setConnection($this->connection);
         // Este test tiene que sustituir los campos seleccionados.Ojo: no se hace nigun chequeo de si esos campos son realmente devueltos por la query!!
         $g=new StorageEngineGetParams(
-            array("query"=>"test","requestedFields"=>array(array("field"=>"d"),array("field"=>"e","transform"=>"SUM"),array("field"=>"f","transform"=>"COUNT"))));
+            array("query"=>"test","requestedFields"=>array(array("field"=>"d"),array("field"=>"e","aggregation"=>"SUM"),array("field"=>"f","aggregation"=>"COUNT"))));
         $composed=$q1->parse($g);
         $this->assertEquals("SELECT d,SUM(e),COUNT(f) FROM tableTest",trim($composed));
         $extraFields=$q1->getCalculatedFields();
@@ -322,10 +322,10 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("d",$keys[0]);
         $this->assertEquals(true,isset($extraFields["d"]["CALCULATED"]));
         $this->assertEquals("Decimal",$extraFields["d"]["TYPE"]);
-        $this->assertEquals("FIELDTRANSFORM",$extraFields["d"]["CALCULATED"]["SOURCE"]);
-        $this->assertEquals(null,$extraFields["d"]["CALCULATED"]["TRANSFORM"]);
-        $this->assertEquals("SUM",$extraFields["SUM(e)"]["CALCULATED"]["TRANSFORM"]);
-        $this->assertEquals("COUNT",$extraFields["COUNT(f)"]["CALCULATED"]["TRANSFORM"]);
+        $this->assertEquals("FIELDAGGREGATION",$extraFields["d"]["CALCULATED"]["SOURCE"]);
+        $this->assertEquals(null,$extraFields["d"]["CALCULATED"]["AGGREGATION"]);
+        $this->assertEquals("SUM",$extraFields["SUM(e)"]["CALCULATED"]["AGGREGATION"]);
+        $this->assertEquals("COUNT",$extraFields["COUNT(f)"]["CALCULATED"]["AGGREGATION"]);
     }
 
     function testFieldTransformsAndGroupings()
@@ -350,12 +350,12 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
         // Este test tiene que sustituir los campos seleccionados.Ojo: no se hace nigun chequeo de si esos campos son realmente devueltos por la query!!
         $g=new StorageEngineGetParams(
             array("query"=>"test",
-                "requestedFields"=>array(array("field"=>"d"),array("field"=>"e","transform"=>"SUM"),array("field"=>"f","transform"=>"COUNT")),
-                "grouping"=>array(array("field"=>"f","transform"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_MONTH),
-                    array("field"=>"g","transform"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_DAY),
-                    array("field"=>"h","transform"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_HOUR),
-                    array("field"=>"i","transform"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_WEEK),
-                    array("field"=>"j","transform"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_WEEKDAY),
+                "requestedFields"=>array(array("field"=>"d"),array("field"=>"e","aggregation"=>"SUM"),array("field"=>"f","aggregation"=>"COUNT")),
+                "grouping"=>array(array("field"=>"f","aggregation"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_MONTH),
+                    array("field"=>"g","aggregation"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_DAY),
+                    array("field"=>"h","aggregation"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_HOUR),
+                    array("field"=>"i","aggregation"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_WEEK),
+                    array("field"=>"j","aggregation"=>\lib\StorageEngine\StorageEngineGetParams::GROUP_WEEKDAY),
                     )
             ));
 
@@ -370,7 +370,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                         array (
                             'SOURCE' => 'GROUPING',
                             'FIELD' => 'f',
-                            'TRANSFORM' => 'MONTH',
+                            'AGGREGATION' => 'MONTH',
                             'PARAM' => 'Year',
                         ),
                 ),
@@ -381,7 +381,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                         array (
                             'SOURCE' => 'GROUPING',
                             'FIELD' => 'f',
-                            'TRANSFORM' => 'MONTH',
+                            'AGGREGATION' => 'MONTH',
                             'PARAM' => 'Month',
                         ),
                 ),
@@ -392,7 +392,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                         array (
                             'SOURCE' => 'GROUPING',
                             'FIELD' => 'g',
-                            'TRANSFORM' => 'DAY',
+                            'AGGREGATION' => 'DAY',
                         ),
                 ),
             'g_hour_h' =>
@@ -402,7 +402,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                         array (
                             'SOURCE' => 'GROUPING',
                             'FIELD' => 'h',
-                            'TRANSFORM' => 'HOUR',
+                            'AGGREGATION' => 'HOUR',
                         ),
                 ),
             'g_week_i' =>
@@ -412,7 +412,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                         array (
                             'SOURCE' => 'GROUPING',
                             'FIELD' => 'i',
-                            'TRANSFORM' => 'WEEK',
+                            'AGGREGATION' => 'WEEK',
                         ),
                 ),
             'g_dweek_j' =>
@@ -422,7 +422,7 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                         array (
                             'SOURCE' => 'GROUPING',
                             'FIELD' => 'j',
-                            'TRANSFORM' => 'GROUP_WEEKDAY',
+                            'AGGREGATION' => 'GROUP_WEEKDAY',
                         ),
                 ),
             'd' =>
@@ -430,9 +430,9 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                     'TYPE' => 'Decimal',
                     'CALCULATED' =>
                         array (
-                            'SOURCE' => 'FIELDTRANSFORM',
+                            'SOURCE' => 'FIELDAGGREGATION',
                             'FIELD' => 'd',
-                            'TRANSFORM' => NULL,
+                            'AGGREGATION' => NULL,
                         ),
                 ),
             'SUM(e)' =>
@@ -440,9 +440,9 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                     'TYPE' => 'Decimal',
                     'CALCULATED' =>
                         array (
-                            'SOURCE' => 'FIELDTRANSFORM',
+                            'SOURCE' => 'FIELDAGGREGATION',
                             'FIELD' => 'e',
-                            'TRANSFORM' => 'SUM',
+                            'AGGREGATION' => 'SUM',
                         ),
                 ),
             'COUNT(f)' =>
@@ -450,9 +450,9 @@ class MysqlQueryTest extends \PHPUnit_Framework_TestCase
                     'TYPE' => 'Decimal',
                     'CALCULATED' =>
                         array (
-                            'SOURCE' => 'FIELDTRANSFORM',
+                            'SOURCE' => 'FIELDAGGREGATION',
                             'FIELD' => 'f',
-                            'TRANSFORM' => 'COUNT',
+                            'AGGREGATION' => 'COUNT',
                         ),
                 ),
         );

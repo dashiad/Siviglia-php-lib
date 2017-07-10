@@ -21,11 +21,13 @@ class AutoLoader
     static $projectRootPath=null;
     function __construct()
     {
-        if(AutoLoader::$registered==0)
-        {
-            AutoLoader::$registered=1;
-            spl_autoload_register(array($this,"resolve"));
+        if (AutoLoader::$registered == 0) {
+            AutoLoader::$registered = 1;
+            spl_autoload_register(array($this, "resolve"));
         }
+    }
+    static function initializeProject()
+    {
         global $currentProject;
         global $currentSite;
 
@@ -35,21 +37,21 @@ class AutoLoader
             $pName = $currentProject->getName();
 
             do {
-                AutoLoader::$sitePaths[] = array($curSite->getSiteRoot(), \lib\project\NamespaceMap::getSiteNamespace($pName, $curSite->getName));
+                AutoLoader::$sitePaths[] = array($curSite->getSiteRoot(), \lib\project\NamespaceMap::getSiteNamespace($pName, $curSite->getName()));
                 $inherited = $curSite->inherits();
                 if ($inherited)
                     $curSite->getSite($inherited);
                 else
                     $curSite = null;
             } while ($curSite);
-            AutoLoader::$projectRootPath = array($currentProject->getRoot(), \lib\project\NamespaceMap::getProjectNamespace($pName));
+            AutoLoader::$projectRootPath = array($currentProject->getProjectRoot(), \lib\project\NamespaceMap::getProjectNamespace($pName));
         }
 
         // Se inicializan los paths de busqueda.
     }
     static function findFile($namespaced,$includeRootPath=0,$includeProjectPath=0,$project=null,$site=null)
     {
-        $namespaced=str_replace('\\',"/",$namespaced);
+        $namespaced=str_replace("/","\\",$namespaced);
         $searchPath=AutoLoader::$sitePaths;
         if($includeRootPath && AutoLoader::$projectRootPath)
             $searchPath[]=AutoLoader::$projectRootPath;
@@ -57,9 +59,9 @@ class AutoLoader
             $searchPath[]=array(PROJECTPATH,"");
         for($k=0;$k<count($searchPath);$k++)
         {
-            $f=$searchPath[$k][0]."/".$namespaced;
+            $f=$searchPath[$k][0]."/".str_replace('\\',"/",$namespaced).".php";
             if(is_file($f) && !in_array($f,AutoLoader::$visitedFiles))
-                return array($f,$searchPath[$k][1].$namespaced);
+                return array($f,$searchPath[$k][1].'\\'.$namespaced);
         }
         throw new AutoLoaderException(AutoLoaderException::ERR_PATH_NOT_FOUND,array("path"=>$namespaced));
     }
@@ -81,13 +83,13 @@ class AutoLoader
             }break;
         }
         try{
-            $result=AutoLoader::findFile(implode("/",$classParts).".php",$includeRoot,$includeProject,$project,$site);
+            return AutoLoader::findFile(implode("/",$classParts),$includeRoot,$includeProject,$project,$site);
         }
         catch(AutoLoaderException $e)
         {
-            throw new AutoLoaderException(AutoLoaderException::ERR_CLASS_NOT_FOUND,array("className"=>"runtime\\".$classParts));
+            throw new AutoLoaderException(AutoLoaderException::ERR_CLASS_NOT_FOUND,array("className"=>"runtime\\".implode("\\",$classParts)));
         }
-        return array($result[0],$result[1].'\\'.array_pop($classParts));
+
     }
     static function resolveAlias($name)
     {

@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 if(defined("DEVELOPMENT"))
 {
     error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
@@ -35,6 +35,8 @@ define("CURRENT_SITE",$currentProject->getCurrentSiteName());
 
 $confClass=$currentProject->getConfig();
 $currentSite=$currentProject->getCurrentSite();
+
+\lib\autoload\AutoLoader::initializeProject();
 
 
 // Copiamos algunas variables globales, para mantener la compatibilidad

@@ -51,6 +51,8 @@ class CLayoutHTMLParserManager
 abstract class CLayoutElementParser
 {
     var $element;
+    var $referenceNode;
+    var $contents;
 
     function __construct($node)
     {
@@ -82,8 +84,14 @@ abstract class CLayoutElementParser
     abstract function process($referenceNode);
     function processContents()
     {
-        for($k=0;$k<count($this->contents);$k++)
-            $result.=$this->contents[$k]->process($this->referenceNode);
+        $result="";
+        if($this->contents=="")
+            return "";
+        for($k=0;$k<count($this->contents);$k++) {
+            if(!is_object($this->contents[$k]))
+                continue;
+            $result .= $this->contents[$k]->process($this->referenceNode);
+        }
         return $result;
     }
 }
@@ -218,6 +226,7 @@ class SubWidgetFileParser extends CWidgetItemParser {
 }
 
 class CWidgetParser extends CWidgetItemParser {
+    var $referenceNode;
     function __construct($node)
     {
         $this->layoutName=$node->name;
@@ -238,6 +247,7 @@ class CWidgetParser extends CWidgetItemParser {
     function __process($referenceNode)
     {
 
+        $text="";
           if($this->element->params)
         {
             // Si existen parametros, se van a mapear los parametros que nos han pasado, a variables PHP.
@@ -296,9 +306,10 @@ class CWidgetParser extends CWidgetItemParser {
 }
 
 class CSubWidgetParser extends CWidgetItemParser {
+    var $contents="";
     function process($referenceNode)
     {        
-        
+        $content="";
         if($this->element->startBlockControl)
             $content=$this->element->startBlockControl->preparedContents;        
         $content.=$this->__process($referenceNode);
@@ -308,6 +319,7 @@ class CSubWidgetParser extends CWidgetItemParser {
     }
     function __process($referenceNode)
     {
+        $text="";
          if($this->element->params)
         {
             // Si existen parametros, se van a mapear los parametros que nos han pasado, a variables PHP.

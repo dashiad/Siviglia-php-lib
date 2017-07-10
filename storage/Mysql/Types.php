@@ -1,5 +1,5 @@
 <?php
-  namespace lib\storageEngine\Mysql;
+  namespace lib\storage\Mysql;
 
   abstract class BaseType {
       abstract function getBindType($type);

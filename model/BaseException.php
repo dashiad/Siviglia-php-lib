@@ -21,8 +21,10 @@
         $rfl=new \ReflectionClass(get_class($this));
         $constants=array_flip($rfl->getConstants());
         $cad= get_class($this)."[ {$this->code} :".$constants[$this->code]." ] <br>";
-        if($this->params)
-              $cad.=json_encode($this->params);
+        if($this->params) {
+            $cad=\lib\php\ParametrizableString::getParametrizedString($cad,$this->params);
+            $cad.="<br>";
+        }
         $cad.=json_encode($this->getTrace());
         return $cad;
       }

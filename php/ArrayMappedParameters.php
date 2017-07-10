@@ -17,6 +17,7 @@ class ArrayMappedParametersException extends BaseException
     const ERR_UNKNOWN_PARAMETER=4;
     const ERR_CANT_CREATE_INTERFACE_FROM_ARRAY=5;
     const ERR_NULL_VALUE_AS_INSTANCE_VALUE=6;
+    const ERR_INVALID_VALUE=7;
 }
 
 class ArrayMappedParameters implements \JsonSerializable{
@@ -63,7 +64,7 @@ class ArrayMappedParameters implements \JsonSerializable{
         {
             $fieldDef=isset($definition["fields"][$key])?$definition["fields"][$key]:null;
             $curVal=isset($arr[$key])?$arr[$key]:(isset($value)?$value:null);
-            if(!isset($curVal))
+            if(!isset($curVal) || $curVal===null)
             {
                 if(isset($fieldDef["default"])) {
                     $this->{$key} = $fieldDef["default"];
@@ -88,7 +89,8 @@ class ArrayMappedParameters implements \JsonSerializable{
                 $this->{$key}=$curVal;
                 continue;
             }
-
+            if($this->checkType($fieldDef,$key,$curVal))
+                continue;
             if(isset($fieldDef["relation"]))
             {
                 $this->checkRelation($key,$fieldDef,$arr);
@@ -106,7 +108,15 @@ class ArrayMappedParameters implements \JsonSerializable{
 
         }
     }
-
+    function checkType($def,$key,$curVal)
+    {
+        if(!isset($def["TYPE"]))
+            return false;
+        $type=\lib\model\types\TypeFactory::getType(null,$def);
+        if($type->validate($curVal))
+            return true;
+        throw new ArrayMappedParametersException(ArrayMappedParametersException::ERR_INVALID_VALUE,array("class"=>get_called_class(),"field"=>$key,"value"=>$curVal));
+    }
     function checkRelation($fName,$definition,$values)
     {
         $isArr=is_array($values[$fName]);

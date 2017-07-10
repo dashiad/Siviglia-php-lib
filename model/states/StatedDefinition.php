@@ -57,7 +57,7 @@ class StatedDefinition
         }
         function enable()
         {
-            $this->hasState=$this->definition["STATES"]?true:false;
+            $this->hasState=isset($this->definition["STATES"])?true:false;
             if($this->hasState)
             {
                 $this->stateField=$this->definition["STATES"]["FIELD"];

@@ -20,7 +20,6 @@ include_once(dirname(__FILE__)."/../../Plugin.php");
  * Declaracion de dependencia
 [@DEPENDENCY]
    [_BUNDLE]Global[#]
-
    [_CONTENTS]
        [_META][_MODEL]Bag[#][#]
        [_CSS][_FILE]a/b/c[#][#]
@@ -41,10 +40,8 @@ include_once(dirname(__FILE__)."/../../Plugin.php");
 
 // Configuracion
 "BUNDLES"=>array(
-
     "Global"=><localizacion de los ficheros>
 )
-"MACROS"=>array("<rep>"=>"<value>")
 "DOCUMENT_ROOT"=><path al document root de la web>
 "WEB_ROOT"=><url de la web>
 "WIDGET_PATH"=>array("/es_mobile","/es","/") <-- Lista de carpetas dentro de los objetos donde buscar widgets
@@ -55,7 +52,6 @@ class DEPENDENCY_BUNDLE {
     var $resources=array();
     var $layoutManager=null;
     static $bundlePaths=array();
-    var $refTime;
     function __construct($name,$basePath,$documentRoot,$webRoot="")
     {
         $this->name=$name;
@@ -90,7 +86,6 @@ class DEPENDENCY_BUNDLE {
 	$baseText="";
         if(isset($this->resources[$phase]))
         {
-            $this->refTime=time();
             $cssText="";
             $jsText="";
             $htmlText="";
@@ -111,7 +106,11 @@ class DEPENDENCY_BUNDLE {
                     //    $this->usedFiles[$cur[1][2].$key]=1;
 
                     // Se añade el comentario de inicio.
-                    $text.=$cur[1][0];
+                    $noFile=count($cur[1])==1?true:false;
+                    if(!$noFile)
+                        $text.=$cur[1][0];
+
+                    // Si $cur[0]!=null, significa que no habia un subtag FILE o URL, sino un CODE que hay que poner inline.
                     if($cur[0]!==null){
                         if(!defined("DEVELOPMENT") || DEVELOPMENT==0)
                         // Codigo inline;
@@ -139,42 +138,31 @@ class DEPENDENCY_BUNDLE {
                     }
                     else
                     {
-                        // Codigo en fichero.
+                        // Tenemos codigo en url y/o fichero.
                         // Hay que aniadir este fichero como dependencia del layout actual.
-                        $parsed=0;
                         $url=null;
-			            if(!defined("DEVELOPMENT") || DEVELOPMENT==0)
+
+                        if($noFile)
+                        {
+                            $url=$cur[1][0];
+                        }
+                        else
+                        {
+                            if(defined("DEVELOPMENT") && DEVELOPMENT==="1")
+                                $url=$cur[1][4];
+                        }
+                        if($url==null)
 			            {
-                            if(isset($cur[1][3]))
-                            {
-                                $this->layoutManager->addDependency($cur[1][3]);
-                        	    if(!is_file($cur[1][3]))
-                        	    {
-                            		var_dump($cur);
+                        	$this->layoutManager->addDependency($cur[1][3]);
+                        	if(!is_file($cur[1][3]))
+                        	{
                             		die("La dependencia ".$cur[1][3]." no se encuentra.");
-                        	    }
-                        	    $text.=file_get_contents($cur[1][3]);
-                                $parsed=1;
-                            }
-                            else
-                            {
-                                // Es un recurso externo, que no especifica FILE.
-
-                                if(!isset($cur[1][0]))
-                                    var_dump($cur);
-                                $url=$cur[1][0];
-                            }
+                        	}
+                        	$text.=file_get_contents($cur[1][3]);
 			            }
-			            if(!$parsed)
+			            if($url!=null)
 			            {
 
-                            if($url==null)
-                            {
-                                if($cur[1][4])
-                                    $url=$cur[1][4];
-                                else
-                                    $url=str_replace($this->documentRoot,"",$cur[1][0]);
-                            }
                             switch($key)
                             {
                                 case "CSS":
@@ -190,11 +178,11 @@ class DEPENDENCY_BUNDLE {
                                 }
                             }
                             continue;
-
 			            }
                     }
                     // Se añade el comentario de fin
-                    $text.=$cur[1][1];
+                    if(!$noFile)
+                        $text.=$cur[1][1];
                 }
                 // Se guarda el fichero, segun la fase
                 if($key!="HTML")
@@ -214,8 +202,8 @@ class DEPENDENCY_BUNDLE {
                     $url="";
                     if($text!="")
                     {
-
-                        $cTime=$this->refTime;
+				
+                        $cTime=time();
                         $newName=$this->name."-".$phase."-";
                         $baseNewFileName=$destPath."/".$newName;
 		/*
@@ -313,12 +301,12 @@ class DEPENDENCY extends Plugin {
     function parse()
     {
         $spec=$this->parseNode($this->layoutContents,true);
-        $currentNode=array("TYPE"=>"HTML","TEXT"=>"");
+        $currentNode=new \CHTMLElement("",$this->layoutContents[0]->parentWidget);
 
         $bundle=$this->getNodesByTagName("BUNDLE",$spec);
         if(count($bundle)>0)
         {
-            $currentNode["TEXT"].="<!-- @DEPENDENCY LIST-->";
+            $currentNode->preparedContents="<!-- @DEPENDENCY LIST-->";
             $returnValue=array($currentNode);
 
             $this->currentBundle=$bundle[0];
@@ -336,7 +324,7 @@ class DEPENDENCY extends Plugin {
         $phase=$this->getNodesByTagName("PHASE",$spec);
         if(count($phase) > 0)
         {
-            $currentNode["TEXT"]="<!-- @DEPENDENCY PHASE ".strtoupper($phase[0])."-->";
+            $currentNode->preparedContents="<!-- @DEPENDENCY PHASE ".strtoupper($phase[0])."-->";
         }
         return array($currentNode);
     }
@@ -362,8 +350,7 @@ class DEPENDENCY extends Plugin {
         return array();
     }
     function parse_JSMODEL($spec,$bundle)
-    {
-        include_once(LIBPATH."/reflection/Meta.php");
+    {        include_once(LIBPATH."/reflection/Meta.php");
         $objName=$spec["OBJECT"][0];
         // Cuando se carga un modelo, hay que meter tanto su meta, como la instancia del fichero.
         include_once(PROJECTPATH."/lib/reflection/model/ObjectDefinition.php");
@@ -372,7 +359,7 @@ class DEPENDENCY extends Plugin {
 
         // Se marca este modelo como ya usado.
         if(DEPENDENCY::$usedModels[$srcFile])
-            return array(array("TYPE"=>"HTML","TEXT"=>""),array("TYPE"=>"HTML","TEXT"=>""));
+            return array(new \CHTMLElement(""),"",new \CHTMLElement(""));
         DEPENDENCY::$usedModels[$srcFile]=1;
 
         $canonical=$Obj->getFullNormalizedName(".");
@@ -462,7 +449,7 @@ class DEPENDENCY extends Plugin {
             $encoded=$instance->execute();
             $fullcode="Cache.add('".$cacheName."',".$encoded.");";
 
-            DEPENDENCY::$bundles[$bundle]->addResource("SCRIPT",$fullcode,$info,"HEADERS");
+            DEPENDENCY::$bundles[$bundle]->addResource("SCRIPT",$fullCode,$info,"HEADERS");
             return array();
         }
         else
@@ -479,7 +466,7 @@ class DEPENDENCY extends Plugin {
             $code.=implode(",",$phpparams)."));\n";
             $code.='$result'.$f2.'=$instance'.$f2.'->execute(); ?>';
             // Se mete esto como un bloque PHP
-            $returned[]=array("TYPE"=>"PHP","TEXT"=>$code);
+            $returned[]=new CPHPElement($code,$this->layoutContents[0]->parentWidget);
             // Ahora hay un problema:
             // Los siguientes elementos se van a meter en el sitio donde se *declare*
             // las dependencias, y no donde se *vuelque* la fase asociada (headers,etc).En general, si solo se devuelven
@@ -494,9 +481,9 @@ class DEPENDENCY extends Plugin {
 
             $funcName="sf".rand(0,100000);
 
-            $returned[]=array("TYPE"=>"HTML","TEXT"=>"\n\n<script>function ".$funcName."(){Cache.add('".$cacheName."',");
-            $returned[]=array("TYPE"=>"PHP","TEXT"=>"<?php echo \$result".$f2.";?>");
-            $returned[]=array("TYPE"=>"HTML","TEXT"=>");}</script>");
+            $returned[]=new CHTMLElement("\n\n<script>function ".$funcName."(){Cache.add('".$cacheName."',",$this->layoutContents[0]->parentWidget);
+            $returned[]=new CPHPElement("<?php echo \$result".$f2.";?>",$this->layoutContents[0]->parentWidget);
+            $returned[]=new CHTMLElement(");}</script>",$this->layoutContents[0]->parentWidget);
             $fullcode=$funcName."();";
             DEPENDENCY::$bundles[$bundle]->addResource("SCRIPT",$fullcode,$info,"HEADERS");
             return $returned;
@@ -539,15 +526,16 @@ class DEPENDENCY extends Plugin {
 
         DEPENDENCY::$usedWidgets[$srcFile]=1;
         $srcContents=file_get_contents($srcFile);
-        $oParser=new CWidgetGrammarParser("subwidgetFile",1,null,$this->layoutManager);
-        $result=$oParser->compile($srcContents,$this->layoutManager->getLang(),$this->layoutManager->getTargetProtocol());
+        $oParser=new CWidgetGrammarParser("subwidgetFile",1,$this->layoutContents[0]->parentWidget,$this->layoutManager);
+        $layout=$oParser->compile($srcContents,$this->layoutManager->getLang(),$this->layoutManager->getTargetProtocol());
 
-
+        $oLParser=new \CLayoutHTMLParserManager();
+        $result=$oLParser->process($layout,$this->layoutManager);
         // Se crean dos nodos html para despues poder cortar el contenido, y moverlo a su fase correspondiente.
         $uuid=uniqid();
-        $pre=array("TYPE"=>"HTML","TEXT"=>"<!-- HTML_DEPENDENCY $bundle BODYSTART $uuid -->");
-        $post=array("TYPE"=>"HTML","TEXT"=>"<!-- HTML DEPENDENCY END $uuid -->");
-        $layout=array("TYPE"=>"HTML","TEXT"=>$result);
+        $pre=new \CHTMLElement("<!-- HTML_DEPENDENCY $bundle BODYSTART $uuid -->",$this->layoutContents[0]->parentWidget);
+        $post=new \CHTMLElement("<!-- HTML DEPENDENCY END $uuid -->",$this->layoutContents[0]->parentWidget);
+        $layout=new \CHTMLElement($result,$this->layoutContents[0]->parentWidget);
         return array($pre,$layout,$post);
     }
 
@@ -580,14 +568,11 @@ class DEPENDENCY extends Plugin {
             $info=$this->__getFileHash($type,$file);
             // El path tiene que ser absoluto
         }
-        // Si no hay especificado un FILE, sino solo una URL, $info tendra solo 1 elemento.
         if(isset($spec["URL"]))
         {
-            $info[]=str_replace($mkeys,$mvalues,$spec["URL"][0]);
+            $spec["URL"][0]=str_replace($mkeys,$mvalues,$spec["URL"][0]);
         }
-        else
-            $info[]="";
-
+        $info[]=(isset($spec["URL"])?$spec["URL"][0]:"");
         return array($code,$info,$phase);
     }
 
@@ -619,6 +604,7 @@ class DEPENDENCY extends Plugin {
         $layoutName=str_replace($this->layoutManager->getBasePath(),"",$this->layoutManager->getLayout());
         $parts=explode(".",$layoutName);
         unset($parts[count($parts)-1]);
+        $fileName=implode(".",$parts);
         $curWidget=$this->layoutManager->currentWidget;
         $subPath=str_replace($this->layoutManager->getBasePath(),"",str_replace("//","/",$curWidget["FILE"]));
         $p=basename($subPath);

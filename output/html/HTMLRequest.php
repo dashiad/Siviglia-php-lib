@@ -98,11 +98,11 @@ class HTMLRequest extends \Request implements \ArrayAccess
 	else
 	    $browser=null;
         $this->client=array("request" => $_SERVER["QUERY_STRING"],
-            "referer" => $_SERVER["HTTP_REFERER"],
+            "referer" => isset($_SERVER["HTTP_REFERER"])?$_SERVER["HTTP_REFERER"]:"",
             "browser" => $browser?$browser["browser"]:'',
             "OS" => $browser?$browser["platform"]:'',
             "version" => $browser?$browser["version"]:'',
-            "ip" => \lib\model\types\IP::getCurrentIp()
+            "ip" => \lib\model\types\IPType::getCurrentIp()
         );
 
         return $this->client;

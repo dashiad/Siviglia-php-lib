@@ -86,7 +86,6 @@ interface ReferencesModel
               }
               else
                   $def=$object->getDefinition();
-              debug($def);
               if($def["EXTENDS"])
                       return TypeFactory::getType($def["EXTENDS"],$def,$value);              
           }

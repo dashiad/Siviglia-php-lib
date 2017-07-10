@@ -32,7 +32,7 @@ class WebProject extends \lib\project\Project{
         // El widget path es,primero, el del site por defecto, luego, el del proyecto, luego, el de sistema.
 
         return array(
-            \lib\project\PathMap::getRelativeSiteRoot($this->name,$this->defaultSite->g)."/widgets",
+            \lib\project\PathMap::getRelativeSiteRoot($this->name,$this->defaultSite->getSiteRoot())."/widgets",
             \lib\project\PathMap::getRelativeProjectRoot($this->name)."/widgets",
             "/widgets"
         );

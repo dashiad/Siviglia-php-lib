@@ -1,37 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: JoseMaria
- * Date: 15/09/15
- * Time: 9:31
- */
-
-namespace lib\storageEngine\Mysql;
-include_once(__DIR__."/../StorageEngine.php");
+/*
+     Siviglia Framework
+*/
+namespace lib\storage\Mysql;
+include_once(LIBPATH."/storage/Base/StorageEngine.php");
+include_once(LIBPATH."/storage/Base/Query/Query.php");
+include_once(__DIR__."/Types.php");
 use lib\php\ArrayMappedParameters;
 use lib\php\ArrayMappedParametersException;
 use lib\php\ParametrizableString;
 use lib\model\BaseException;
-use lib\storageEngine\StorageEngineGetParams;
-use lib\storageEngine\StorageEngine;
-use lib\storageEngine\StorageEngineQueryException;
-use lib\storageEngine\WritableStorageEngine;
-use lib\storageEngine\StorageConnectionFactory;
-use lib\storageEngine\StorageEngineSetParams;
-use lib\storageEngine\StorageEngineResult;
-use lib\storageEngine\StorageEngineQuery;
-use lib\storageEngine\QueryConditionConstants;
-use lib\storageEngine\ICleanableStorageEngine;
+use lib\storage\Base\StorageEngineGetParams;
+use lib\storage\Base\StorageEngine;
+use lib\storage\Base\Query\QueryException;
+use lib\storage\Base\WritableStorageEngine;
+use lib\storage\Base\StorageEngineSetParams;
+use lib\storage\Base\StorageEngineResult;
+use lib\storage\Base\Query\Query;
+use lib\storage\Base\Query\QueryConditionConstants;
+use lib\storage\Base\ICleanableStorageEngine;
 
-class MysqlStorageEngineException extends BaseException{
-    const ERR_SET_EXCEPTION=1;
-    const ERR_UNDEFINED_PARAMETER=2;
-
-    const TXT_SET_EXCEPTION="Excepcion en Mysql SET";
-    const TXT_UNDEFINED_PARAMETER="Parametro no definido : [%param_name%]";
-}
-
-abstract class BaseMysqlQuery extends StorageEngineQuery
+abstract class BaseMysqlQuery extends Query
 {
     // Si no esta definida en la query, se tomara la definida en el los parametros del StorageEngine
     /*
@@ -159,12 +148,12 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
         $operator=$cond["OPERATOR"];
 
         if(!isset($this->parameters[$field]))
-            throw new StorageEngineQueryException(StorageEngineQueryException::ERR_UNKNOWN_PARAMETER, array("field" => $field));
+            throw new QueryException(QueryException::ERR_UNKNOWN_PARAMETER, array("field" => $field));
         if(isset($cond["VALUE"])) {
             $value = $cond["VALUE"];
             if (!is_a($value, '\lib\model\types\BaseType'))
-                        $value = \lib\model\types\TypeFactory::getType(null, $this->parameters[$field], $value);
-            $serializer = \lib\storageEngine\Mysql\BaseType::getSerializerFor($value);
+                $value = \lib\model\types\TypeFactory::getType(null, $this->parameters[$field], $value);
+            $serializer = \lib\storage\Mysql\BaseType::getSerializerFor($value);
             $value = $serializer::serialize($value);
         }
         // No nos metemos aqui en obtener cada uno de los tipos, etc, etc.
@@ -173,7 +162,7 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
         {
             case QueryConditionConstants::COND_EQUALS:{
                 if(!isset($value))
-                    throw new StorageEngineQueryException(StorageEngineQueryException::ERR_MISSING_FILTER_VALUE, array("field" => $field));
+                    throw new QueryException(QueryException::ERR_MISSING_FILTER_VALUE, array("field" => $field));
                 $partial=$field." = ".$value;
             }break;
             case QueryConditionConstants::COND_GREATER:{
@@ -208,7 +197,7 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
             }break;
             default:
             {
-                throw new StorageEngineQueryException(StorageEngineQueryException::ERR_UNKNOWN_OPERATOR,array("operator"=>$operator));
+                throw new QueryException(QueryException::ERR_UNKNOWN_OPERATOR,array("operator"=>$operator));
             }
         }
 
@@ -277,7 +266,7 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
         return $this->_composedQuery;
     }
 
-    protected function parseFieldTransforms($reqFields)
+    protected function parseFieldAggregation($reqFields)
     {
         $fieldList=array();
         $exp="";
@@ -285,7 +274,7 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
         {
             $c=$reqFields[$k];
             $field=$c->field;
-            switch($c->transform)
+            switch($c->aggregation)
             {
                 case StorageEngineGetParams::AGG_SUM:{$exp="SUM($field)";}break;
                 case StorageEngineGetParams::AGG_MAX:{$exp="MAX($field)";}break;
@@ -299,11 +288,11 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
             }
 
             if($c->altName) {
-                $this->_calculatedFields[$c->altName]=array("TYPE"=>"Decimal","CALCULATED"=>array("SOURCE"=>"FIELDTRANSFORM","FIELD"=>$field,"TRANSFORM"=>$c->transform));
+                $this->_calculatedFields[$c->altName]=array("TYPE"=>"Decimal","CALCULATED"=>array("SOURCE"=>"FIELDAGGREGATION","FIELD"=>$field,"AGGREGATION"=>$c->aggregation));
                 $exp .= " " . $c->altName;
             }
             else
-                $this->_calculatedFields[$exp]=array("TYPE"=>"Decimal","CALCULATED"=>array("SOURCE"=>"FIELDTRANSFORM","FIELD"=>$field,"TRANSFORM"=>$c->transform));
+                $this->_calculatedFields[$exp]=array("TYPE"=>"Decimal","CALCULATED"=>array("SOURCE"=>"FIELDAGGREGATION","FIELD"=>$field,"AGGREGATION"=>$c->aggregation));
 
             $fieldList[]=$exp;
         }
@@ -318,8 +307,8 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
         {
             $c=$grouping[$k];
             $field=$c->field;
-            $calculated=array("SOURCE"=>"GROUPING","FIELD"=>$field,"TRANSFORM"=>$c->transform);
-            switch($c->transform)
+            $calculated=array("SOURCE"=>"GROUPING","FIELD"=>$field,"AGGREGATION"=>$c->aggregation);
+            switch($c->aggregation)
             {
                 case StorageEngineGetParams::GROUP_MONTH:{
                     $exp="YEAR($field),MONTH($field)";
@@ -328,9 +317,9 @@ abstract class BaseMysqlQuery extends StorageEngineQuery
                     if(!isset($sorting["g_year_$field"]))
                         $sorting["g_year_$field"]="ASC";
                     if(!isset($sorting["g_month_$field"]))
-                    $sorting["g_month_$field"]="ASC";
-                    $this->_calculatedFields["g_year"]=array("TYPE"=>"Integer","CALCULATED"=>array("SOURCE"=>"GROUPING","FIELD"=>$field,"TRANSFORM"=>$c->transform,"PARAM"=>"Year"));
-                    $this->_calculatedFields["g_month"]=array("TYPE"=>"Integer","CALCULATED"=>array("SOURCE"=>"GROUPING","FIELD"=>$field,"TRANSFORM"=>$c->transform,"PARAM"=>"Month"));
+                        $sorting["g_month_$field"]="ASC";
+                    $this->_calculatedFields["g_year"]=array("TYPE"=>"Integer","CALCULATED"=>array("SOURCE"=>"GROUPING","FIELD"=>$field,"AGGREGATION"=>$c->aggregation,"PARAM"=>"Year"));
+                    $this->_calculatedFields["g_month"]=array("TYPE"=>"Integer","CALCULATED"=>array("SOURCE"=>"GROUPING","FIELD"=>$field,"AGGREGATION"=>$c->aggregation,"PARAM"=>"Month"));
                 }break;
 
                 case StorageEngineGetParams::GROUP_DAY:{
@@ -388,7 +377,7 @@ class FixedMysqlQuery extends BaseMysqlQuery
 {
     function getBaseQuery($params,$filter,$extraFields)
     {
-        if(is_a($params,'\lib\storageEngine\StorageEngineSetParams'))
+        if(is_a($params,'\lib\storage\Base\StorageEngineSetParams'))
         {
             // Si los parametros son de tipo SET, en una query FIXED, se tratan commo si fueran simples parametros.
         }
@@ -403,7 +392,7 @@ class DynamicMysqlQuery extends BaseMysqlQuery
     function getBaseQuery($params,$filter,$extraFields)
     {
 
-        if(is_a($params,'\lib\storageEngine\StorageEngineSetParams'))
+        if(is_a($params,'\lib\storage\Base\StorageEngineSetParams'))
             $base=$this->composeSetQuery($params,$filter,$extraFields);
         else
             $base=$this->composeSelectQuery($params,$filter,$extraFields);
@@ -425,7 +414,7 @@ class DynamicMysqlQuery extends BaseMysqlQuery
     {
         if($params->requestedFields!=null)
         {
-            $selectedFields=$this->parseFieldTransforms($params->requestedFields);
+            $selectedFields=$this->parseFieldAggregation($params->requestedFields);
         }
         else
         {
@@ -483,13 +472,13 @@ class DynamicMysqlQuery extends BaseMysqlQuery
                                 $meta = $this->getConnection()->discoverTableFields($this->base["TABLE"]);
                             }
                             if(!isset($meta[$k]))
-                                throw new StorageEngineQueryException(StorageEngineQueryException::ERR_UNKNOWN_FIELD,array("field"=>$k,"table"=>$this->base["TABLE"]));
+                                throw new QueryException(QueryException::ERR_UNKNOWN_FIELD,array("field"=>$k,"table"=>$this->base["TABLE"]));
                             $def=$meta[$k];
                         }
 
                         $v = \lib\model\types\TypeFactory::getType(null, $def, $v);
                     }
-                    $serializer = \lib\storageEngine\Mysql\BaseType::getSerializerFor($v);
+                    $serializer = \lib\storage\Mysql\BaseType::getSerializerFor($v);
                     $serialized[$k] = $serializer::serialize($v);
                     $parts[]=$k."=".$serialized[$k];
                 }
@@ -510,72 +499,14 @@ class DynamicMysqlQuery extends BaseMysqlQuery
 }
 
 
-class MysqlQueryFactory
+class MysqlQueryFactory extends \lib\storage\Base\Query\QueryFactory
 {
-    static function getInstance($arr)
+    function getInstance($arr)
     {
         if(is_array($arr["base"]))
         {
             return new DynamicMysqlQuery($arr);
         }
         return new FixedMysqlQuery($arr);
-    }
-}
-
-
-class MysqlStorageParams extends ArrayMappedParameters
-{
-    var $connectionName;
-    var $queries;
-    var $context = array();
-    static $__definition=array(
-        "fields"=>array(
-            "queries"=>array("dictionary"=>'\lib\storageEngine\Mysql\MysqlQuery')
-        )
-    );
-}
-
-class MysqlStorageEngine extends WritableStorageEngine implements ICleanableStorageEngine
-{
-    var $connection;
-    var $definition;
-    var $params;
-
-    function __construct(MysqlStorageParams $definition)
-    {
-        $this->definition = $definition;
-        \lib\php\ArrayTools::flattenArray($definition->asArray(),$d2);
-        $this->connection = StorageConnectionFactory::getConnectionByName(
-            ParametrizableString::getParametrizedString($definition->connectionName,$d2)
-        );
-        $this->queries = $definition->queries;
-    }
-
-    function get(StorageEngineGetParams $spec)
-    {
-        $q=$this->parseQuery($spec);
-        $data=$this->connection->query($q);
-        return new StorageEngineResult(array("query" => $spec->query, "result" => $data, "source" => $this, "params" => $spec));
-    }
-
-    function set(StorageEngineSetParams $spec)
-    {
-        $q=$this->parseQuery($spec);
-        $this->connection->query($q);
-    }
-
-    function remove(StorageEngineGetParams $spec)
-    {
-        $this->set($spec);
-    }
-    function clean()
-    {
-    }
-    function parseQuery(StorageEngineGetParams $spec)
-    {
-        $spec->merge($this->definition->context, "context");
-        $curQuery = $this->getQuery($spec->query);
-        $curQuery->parse($spec);
-        return $curQuery;
     }
 }

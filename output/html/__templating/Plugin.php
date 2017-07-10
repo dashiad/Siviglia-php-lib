@@ -67,23 +67,22 @@ http://xphperiments.blogspot.com
 
             for($j=0;$j<count($node);$j++)
             {
-                if(!isset($node[$j]["CONTENTS"]))
+                if(!$node[$j]->contents)
                 {
-                    $type=$node[$j]["TYPE"];
-                    if ($type == "HTML" || $type == "PHP")
+                    if(is_a($node[$j],"CHTMLElement") || is_a($node[$j],"CPHPElement"))
                     {
-                        $htmlText.=$node[$j]["TEXT"];
+                        $htmlText.=$node[$j]->preparedContents;
                     }
                     continue;
                 }
                 // Si el contenido a su vez es un plugin, con
-                if(isset($node[$j]["isPlugin"]))
+                if($node[$j]->isPlugin)
                 {
-                    $htmlText.=$this->parseNode($node[$j]["CONTENTS"],$preserveOrder);
+                    $htmlText.=$this->parseNode($node[$j]->contents,$preserveOrder);
                     continue;
                 }
-                $name=$node[$j]["NAME"];
-                $result=$this->parseNode($node[$j]["CONTENTS"],$preserveOrder);
+                $name=$node[$j]->name;
+                $result=$this->parseNode($node[$j]->contents,$preserveOrder);
 
                 if($preserveOrder)
                   $subElements[]=array($name,$result);

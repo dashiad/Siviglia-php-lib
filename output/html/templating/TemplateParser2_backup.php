@@ -38,6 +38,7 @@ http://xphperiments.blogspot.com
 
 */
 
+
 include_once(dirname(__FILE__)."/"."Grammar.class.php");
 include_once(dirname(__FILE__)."/Lock.php");
 define("WIDGET_EXTENSION","wid");      
@@ -49,12 +50,12 @@ function print_backtrace_and_exit($msg)
 abstract class CGrammarParser {
     var $grammar;
     function createGrammar(& $grammarObj)
-    {
+    {          
         $this->grammar=$grammarObj;
-
+       
         $funcs=array_keys($this->grammar->params["nt"]);
         $prefix=create_function('$a','return "eval_".$a;');
-
+        
         $nonTerminals=array_map($prefix,$funcs);
         for($k=0;$k<count($nonTerminals);$k++)
         {
@@ -94,22 +95,13 @@ define("PHP_CODE_REGEXP","~<\?php?.*\?>~sU");
 class CWidgetGrammarParser extends CGrammarParser {
 
     var $WidgetStack=array();
-    static $currentTemplate=null;
-    static $currentWidget=null;
-    var $parentWidget;
-    var $context;
-    var $layoutManager;
-    var $codeExpr;
-    var $curLevel;
 
-    function __construct($codeExpr,$curLevel,$parentWidget,$manager,$context)
+    function __construct($codeExpr,$curLevel,$parentWidget,$manager)
     {       
         $this->parentWidget=$parentWidget;
-        $this->context=$context;
         $this->layoutManager=$manager;
         $this->codeExpr=$codeExpr;
         $this->curLevel=$curLevel;
-
         CWidgetGrammarParser::$widgetStack=array();
         $this->initializeGrammar();
     }
@@ -233,26 +225,29 @@ class CWidgetGrammarParser extends CGrammarParser {
 
         return $info;
     }
-
-    function eval_subwidget($params)
+    
+    function common_widget_eval($params,$type)
     {
         $subwidgetPrefix=$params["tag"]["openTag"];
         if($subwidgetPrefix[1]=="@") // Es un plugin
             $type="PLUGIN";
+        if($params["tag"]["control"])
+        {
+            $h=11;
+            $p=22;
+        }
 
         $info=array(
-            "TYPE"=>"SUBWIDGET",
+            "TYPE"=>$type,
             "NAME"=>$params["tag"]["tag"],
             "TAG"=>$params["tag"],
             "PASSTHRU"=>$subwidgetPrefix[1]=="=",
             "LEVEL"=>strlen($subwidgetPrefix)-2,
-            "CONTROL"=>array("start"=>$params["tag"]["control"],"end"=>$params["tag_close"]["control"]),
-            "CONTEXT"=>$this->context
+            "CONTROL"=>array("start"=>$params["tag"]["control"],"end"=>$params["tag_close"]["control"])
         );
-        $targetVariable=null;
-        if(isset($params["tag"]["phpAssign"])) {
-            $info["ASSIGN_TO"]=$params["tag"]["phpAssign"];
-        }
+
+        if(isset($params["tag"]["phpAssign"]))
+            $info["ASSIGN_TO"]=$params["tag"]["phpAssign"]["varName"];
 
         $paramExpr=$params["tag"]["parameters"]["expr"];
         if($paramExpr)
@@ -266,275 +261,22 @@ class CWidgetGrammarParser extends CGrammarParser {
                 $c=array($c);
             $info["CONTENTS"]=$c;
         }
-        // Se mira ahora el php embebido dentro del tag (ifs, bucles,etc)
-        $control=$this->parseControl($info);
-        if($control)
-        {
-            array_unshift($info["CONTENTS"],$control[0]);
-            $info["CONTENTS"][]=$control[1];
-        }
-        if($targetVariable)
-        {
-            $info["CONTENTS"]=array($this->parseVariableAssign($targetVariable,$info["CONTENTS"]));
-        }
         return $info;
     }
 
-
-
-
+    function eval_subwidget($params)
+    {
+        return $this->common_widget_eval($params,"SUBWIDGET");
+    }
     function eval_widget($params)
     {
-        $subwidgetPrefix=$params["tag"]["openTag"];
-        $type="WIDGET";
-
-
-        $info=array(
-            "TYPE"=>$type,
-            "NAME"=>$params["tag"]["tag"],
-            "TAG"=>$params["tag"],
-            "PASSTHRU"=>$subwidgetPrefix[1]=="=",
-            "LEVEL"=>strlen($subwidgetPrefix)-2,
-            "CONTROL"=>array("start"=>$params["tag"]["control"],"end"=>$params["tag_close"]["control"]),
-            "CONTEXT"=>$this->context
-        );
-        $paramExpr=isset($params["tag"]["parameters"]["expr"])?$params["tag"]["parameters"]["expr"]:null;
-
-        if($subwidgetPrefix[1]=="@") // Es un plugin
-        {
-            $result = $this->layoutManager->parsePlugin($info, $info["NAME"], $params["contents"]);
-            if(isset($c["FILE"]))
-                $this->layoutManager->addDependency($c["FILE"], "plugin");
-            return $result;
-        }
-
-        if(!is_array($params["contents"]))
-            $c=array($params["contents"]);
-        else
-            $c=$params["contents"];
-        $location="";
-        $widgetContents=$this->layoutManager->layoutLoader->findWidget($params["tag"]["tag"],$location);
-        $newContext=new SubwidgetFileContext();
-        $this->layoutManager->addDependency($location,"widget");
-        $oParser = new CWidgetGrammarParser("subwidgetFile", 0, $info, $this->layoutManager,$newContext);
-        $this->layoutManager->currentWidget = array("FILE" => $location, "NAME" => $params["tag"]["tag"]);
-        $widget=$oParser->compile($widgetContents,$this->layoutManager->getLang(),$this->layoutManager->getTargetProtocol());
-        if(!$widget)
-        {
-            echo "ERROR AL COMPILAR " . $params["tag"]["tag"] . " FILE :" . $location;
-            exit();
-        }
-        $result=array();
-        // Si el contexto actual es el "top", los elementos del layout que tienen que hacer match con el widget, son
-        // los que tengan un nivel "0".Esto es porque en el layout top, todos los elementos estan en nivel 0.
-        // Si el contexto actual no es el top, los elementos de nivel 1 de $c["CONTENTS"] tienen que hacer match con los
-        // elementos de nivel 0 del widget.
-        // Atencion, que lo que hay en $widget es un objeto de tipo SUBWIDGET_FILE
-        $isTop=$this->context->isTopLayout()?0:1;
-        $tempResult=$this->resolveWidgetReferences($c,$widget["CONTENTS"],$isTop,$result);
-
-        if($paramExpr)
-        {
-            // Si hay mapeo de parametros, hay que pasar variables que estan definidas en el contexto local, a variables definidas en el contexto remoto
-            array_unshift($tempResult,
-                $this->parseParams($paramExpr,
-                                            $this->context->getPrefix(),
-                                            $newContext->getPrefix()
-                    ));
-        }
-        // Se mira ahora el php embebido dentro del tag (ifs, bucles,etc)
-        $control=$this->parseControl($info);
-        if($control)
-        {
-            array_unshift($tempResult,$control[0]);
-            $tempResult[]=$control[1];
-        }
-            // Se comprime $result
-        $tt=$this->compressHTML($tempResult);
-        return $tt;
+        return $this->common_widget_eval($params,"WIDGET");
         //$common->subLoad();
     }
-    function compressHTML($tempResult)
-    {
-        $result=array();
-        $lastIsHtml=false;
-        $current=null;
-        for($k=0;$k<count($tempResult);$k++)
-        {
-            if($tempResult[$k]["TYPE"]=="HTML")
-            {
-                if($lastIsHtml)
-                    $current.=$tempResult[$k]["TEXT"];
-                else
-                {
-                    $lastIsHtml=true;
-                    $current=$tempResult[$k]["TEXT"];
-                }
-            }
-            else
-            {
-                if($current!=null)
-                    $result[]=array("TYPE"=>"HTML","TEXT"=>$current);
-                $lastIsHtml=false;
-                $current=null;
-                $result[]=$tempResult[$k];
-            }
-        }
-        if($current!=null)
-            $result[]=array("TYPE"=>"HTML","TEXT"=>$current);
-        return $result;
-    }
-    function resolveWidgetReferences($layout,$widget,$sourceLevel)
-    {
-        // Se va uno a uno por los elementos del $widget, buscando elementos del layout que coincidan.
-        $result=array();
-        for($k=0;$k<count($widget);$k++)
-        {
-            switch($widget[$k]["TYPE"])
-            {
-                case "SUBWIDGET":
-                {
-                    // En el widget, hay un subwidget.Buscamos si la plantilla define instancias de ese subwidget.
-                    for($j=0;$j<count($layout);$j++)
-                    {
-                        $cl=$layout[$j];
-                        // Si en el layout encontramos un subwidget, pero es de un nivel inferior al requerido,
-                        // significa que tenemos una estructura del tipo :
-                        // Layout:
-                        // [_:a]
-                        //      [_b]
-                        //          [_:c]
-                        // Widget:
-                        //  [_a]
-                        //     [_c]
-                        //
-                        // Hemos encontrado b.Lo que necesitamos hacer es mantener b, y el contenido de b, procesarlo sin
-                        // cambiar de widget.
-
-                        if($cl["TYPE"]=="SUBWIDGET")
-                        {
-                            if($sourceLevel > $cl["LEVEL"])
-                            {
-                                /* Estamos en el caso de que entre 2 subwidgets remotos, hay un subwidget local
-                                   Tenemos que copiar el local, y sus hijos, siempre que no sea un subwidget de nivel 1
-                                */
-                                $sres=$cl;
-                                unset($sres["CONTENTS"]);
-                                if(isset($cl["CONTENTS"])) {
-                                    $sres["CONTENTS"] = $this->resolveWidgetReferences($cl["CONTENTS"], array($widget[$k]), $sourceLevel);
-                                }
-
-                                $result[]=$sres;
-                                continue;
-
-                            }
-                            if($layout[$j]["NAME"]==$widget[$k]["NAME"])
-                            {
-                                $subResult=$this->resolveWidgetReferences($layout[$j]["CONTENTS"],$widget[$k]["CONTENTS"],$sourceLevel);
-                                // Se comprueba aqui si el widget tiene un ASSIGN_TO
-                                // Si eso fuera asi, $subResult no contiene nada.Esto es porque, en el widget, este subwidget (tag) no tiene
-                                // un subtag de contenido.
-                                // Es decir, en la plantilla es : [_a=>$mivar][#]. Al no tener un tag de contenido ([_*]), la llamada
-                                // a resolveWidgetReferences va a devolver vacio.Por eso, tenemos que obtener el valor directamente del
-                                // layout, de lo que nos ha llegado, y no de lo que hemos parseado.
-                                if(isset($widget[$k]["ASSIGN_TO"]))
-                                {
-                                    $targetVariable = $widget[$k]["ASSIGN_TO"]["varName"];
-                                    // Lo obtenemos del layout, no del $subResult
-                                    $processed=$this->compressHTML($layout[$j]["CONTENTS"]);
-                                    // Sin embargo, el contexto debe ser el del subwidget, no el del $this (que apunta al layout)
-                                    $subResult=$this->parseVariableAssign($targetVariable,$processed,$widget[$k]["CONTEXT"]);
-                                }
-                                if($subResult!=null)
-                                    $result=array_merge($result,$subResult);
-                            }
-                        }
-
-                    }
-                }break;
-                case "TAG_CONTENT":
-                {
-                    // LLegamos a un tag content...Copiamos todo lo que haya en el widget en este momento:
-                    if($widget[$k]["ASSIGN_TO"])
-                    {
-                        if(count($layout)==1 && $layout[0]["TYPE"]=="HTML")
-                        {
-                            $result[]=$this->parseVariableAssign($widget[$k]["ASSIGN_TO"],$layout[0]["TEXT"]);
-                            continue;
-                        }
-                    }
-                    for($s=0;$s<count($layout);$s++)
-                    {
-                        if(!$layout[$s])
-                            continue;
-                        $result[]=$layout[$s];
-                    }
-                }break;
-                case "PHP":
-                {
-                    $result[]=$widget[$k];
-                }break;
-                default:
-                {
-                    $result[]=$widget[$k];
-                }
-            }
-        }
-        return $this->compressHTML($result);
-        //return $result;
-    }
-    function parseParams($paramsExpr,$parentPrefix,$localPrefix)
-    {
-
-        $data = json_decode($paramsExpr, true);
-        $text="";
-        foreach($data as $key=>$value) {
-            ob_start();
-            var_export($value);
-            $exported=ob_get_clean();
-            $replaced=preg_replace('/[\'"](&{0,1}\$)([^\'"]*)[\'"]/', '\1'.$parentPrefix.'\2',$exported);
-            $text.=('$'.$localPrefix.$key."=".$replaced.";\n");
-        }
-        $code = "<?php " . $text . " ?>";
-        return array("TYPE" => "PHP", "TEXT" => $code);
-    }
-    function parseVariableAssign($varName,$children,$context=null)
-    {
-        $c=$context==null?$this->context:$context;
-        if(count($children)==1 && $children[0]["TYPE"]=="HTML")
-        {
-            if($varName[0]!='$')
-                $varName='$'.$varName;
-            return array(array("TYPE"=>"PHP","TEXT"=>$c->remapVariables("<?php ".$varName."='".addslashes($children[0]["TEXT"])."';?>")));
-        }
-        return $children;
-    }
-    function parseControl($value)
-    {
-        if($value["CONTROL"] && $value["CONTROL"]["start"])
-        {
-
-            $start=$value["CONTROL"]["start"];
-
-            $end=$value["CONTROL"]["end"];
-            $start=trim($start);
-            $end=trim($end);
-            if(substr($start,-1)=="{")
-            {
-                if(substr($end,1)!="}")
-                    $end="}".$end;
-            }
-            $fullC=$start."/* --CONTROL-- */".$end;
-            $remapped=$this->context->remapVariables($fullC);
-            $parts=explode("/* --CONTROL-- */",$remapped);
-            return array(array("TYPE"=>"PHP","TEXT"=>$parts[0]),
-                         array("TYPE"=>"PHP","TEXT"=>$parts[1]));
-        }
-        return null;
-    }
-
+    
     function eval_passthruText($params)
     {
+
         switch($params["selector"])
         {
         case "text":
@@ -554,14 +296,13 @@ class CWidgetGrammarParser extends CGrammarParser {
             }break;
         case "php":
             {
-                $res= array("TYPE"=>"PHP",
-                            "TEXT"=>$this->context->remapVariables($params["result"]),
-                            "CONTEXT"=>$this->context
-                );
-                return $res;
+                return array("TYPE"=>"PHP","TEXT"=>$params["result"]);
             }break;
         }
     }
+
+
+
     /**
      *         tag_contents::= dataText-><datasource_text> || simpleText=>( passthru-><passthruText>
                                || subwidget-><subwidget> 
@@ -570,15 +311,9 @@ class CWidgetGrammarParser extends CGrammarParser {
     function eval_tag_contents($params)
     {
         $results=array();
-        $cc=& $params["result"];
-        $nItems=count($cc);
-        for($k=0;$k<$nItems;$k++) {
-            $c=$cc[$k];
-            if($c["selector"]=="widget")
-                $results=array_merge($results,$c["result"]);
-            else
-                $results[] = $params["result"][$k]["result"];
-        }
+        $nItems=count($params["result"]);
+        for($k=0;$k<$nItems;$k++)
+              $results[]=$params["result"][$k]["result"];
         return $results;
 
     }
@@ -600,7 +335,6 @@ class CWidgetGrammarParser extends CGrammarParser {
     function eval_layoutFile($param)
     {
         $nParams=count($param);
-        $results=array();
         for($k=0;$k<$nParams;$k++)
         {
             if($param[$k]["result"])
@@ -610,43 +344,18 @@ class CWidgetGrammarParser extends CGrammarParser {
     }
 }
 
-
-class SubwidgetFileContext
+class LayoutBuilder
 {
-    static $counter=0;
-    static $stack=array();
-    var $contents;
     var $phpPrefix;
+    var $prefixCounter;
+    var $currentWidget;
     var $phpState;
-    var $noWidGlobals;
-    var $contextType;
-    const CONTEXTYPE_TOPLAYOUT=0;
-    const CONTEXTYPE_WIDGETFILE=1;
-
-    function __construct($contextType=SubwidgetFileContext::CONTEXTYPE_WIDGETFILE)
+    var $layoutManager;
+    var $noWidGlobals=array();
+    var $dataStack=array();
+    function __construct(CLayoutManager $layoutManager)
     {
-        $this->phpPrefix="v".SubwidgetFileContext::$counter;
-        SubwidgetFileContext::$counter++;
-        SubwidgetFileContext::$stack[]=$this;
-        $this->contextType=$contextType;
-        $this->phpState = array("CONTEXT"=>"global");
-    }
-    function getPrefix()
-    {
-        return $this->phpPrefix;
-    }
-    static function getCurrent()
-    {
-        $c=count(SubwidgetFileContext::$stack);
-        return SubwidgetFileContext::$stack[$c-1];
-    }
-    function isTopLayout()
-    {
-        return $this->contextType==SubwidgetFileContext::CONTEXTYPE_TOPLAYOUT;
-    }
-    function remove()
-    {
-        array_pop(SubwidgetFileContext::$stack);
+        $this->layoutManager=$layoutManager;
     }
     function remapVariables($text,$prefix=null)
     {
@@ -685,15 +394,18 @@ class SubwidgetFileContext
                     //if ($this->currentWidget)
                     //    $this->currentWidget["GLOBALS"][] = $tokens[$k][1];
                     //else
-                    $this->noWidGlobals[]=$tokens[$k][1];
+                        $this->noWidGlobals[]=$tokens[$k][1];
 
                 }
-
+                if ($this->currentWidget) {
                     //if (isset($this->currentWidget["GLOBALS"]) && in_array($tokens[$k][1], $this->currentWidget["GLOBALS"])) {
-                if (isset($this->noWidGlobals) && in_array($tokens[$k][1], $this->noWidGlobals)) {
+                    if (isset($this->noWidGlobals) && in_array($tokens[$k][1], $this->noWidGlobals)) {
                         $oldPrefix = $prefix;
                         $prefix = "";
+                    }
                 }
+                else
+                    $prefix = "";
 
                 switch ($tokens[$k][0]) {
                     //case T_OPEN_TAG:{$newText.='<?php ';echo "<h1>OPEN</h1>";}break;
@@ -761,92 +473,272 @@ class SubwidgetFileContext
         $this->phpState = $state;
         return $newText;
     }
-}
-class LayoutLoader
-{
-    var $widgetPath;
-    var $manager;
-    function __construct($manager,$widgetPath)
-    {
-        $this->widgetPath=$widgetPath;
-        $this->manager=$manager;
-    }
-    function findWidgetFile($widgetName,$widgetPath)
-    {
-        if(!$widgetPath)
-            $widgetPath="";
+    var $widgetStack=array();
 
-        reset($this->widgetPath);
-        foreach($this->widgetPath as $key=>$value)
-        {
-            //echo "TRYING ".$value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION."<br>";
-            if(defined("USE_WORK_WIDGETS"))
-            {
-                if(is_file($value."/".$widgetPath."/".$widgetName."_work.".WIDGET_EXTENSION))
-                {
-                    return $value."/".$widgetPath."/".$widgetName."_work.".WIDGET_EXTENSION;
+    function evaluate_tree($contentTree, $currentLevel = 0, $widgetTree = null)
+    {
+        $layoutManager=$this->layoutManager;
+        $nodePreProcessor=null;
+
+        $result = array();
+        if ($widgetTree == null)
+            $tree = &$contentTree;
+        else
+            $tree = &$widgetTree;
+
+        for ($k = 0; $k < count($tree); $k++) {
+            $c = $tree[$k];
+            switch ($c["TYPE"]) {
+                case "SUBWIDGET_FILE": {
+                    $newTree = $this->evaluate_tree($c["CONTENTS"],  $currentLevel, $widgetTree);
+                    $result = array_merge($result, $newTree);
                 }
-            }
-            if(is_file($value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION))
-            {
-                //echo "LOADING ".$value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION;
-                return $value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION;
-            }
-        }
-
-        echo "WIDGET NO ENCONTRADO :: $widgetPath / $widgetName";
-        var_dump($this->widgetPath);
-        die();
-    }
-
-    function findWidget($widgetName,& $widgetLocation,$widgetPath=null)
-    {
-        $widgetFile=$this->findWidgetFile($widgetName,$widgetPath);
-        if(!$widgetFile)
-        {
-            die("UNKNOWN WIDGET::".$widgetName);
-        }
-        $widgetLocation=$widgetFile;
-        $contents=file_get_contents($widgetFile);
-        $parsed=$this->processPrecompilers($contents);
-        if($parsed!=$contents)
-            file_put_contents($widgetFile,$parsed);
-        return $parsed;
-    }
-    function processPrecompilers($content)
-    {
-        if($this->manager->preCompilers===null)
-        {
-            $this->preCompilers=array();
-            $srcDir=dirname(__FILE__).'/'.$this->manager->getTargetProtocol().'/preCompilers';
-            $d=opendir($srcDir);
-            if($d)
-            {
-                while($f=readdir($d))
+                    break;
+                case "PLUGIN":
                 {
-                    $fullName=$srcDir.DIRECTORY_SEPARATOR.$f;
-                    if(is_file($fullName))
+                    $newTree = $layoutManager->parsePlugin($c, $c["NAME"], $c["CONTENTS"]);
+                    $this->layout = $this;
+                    $subResult = $this->evaluate_tree($newTree,  $currentLevel, null);
+                    if(is_array($subResult))
+                        $result = array_merge($result, $subResult);
+                    else
+                        $nodePreProcessor=$subResult;
+                    if(isset($c["FILE"]))
+                        $layoutManager->addDependency($c["FILE"], "plugin");
+
+                }break;
+                case "WIDGET": {
+                    if ($widgetTree != null) {
+                        $t=$currentLevel;
+                        $subResult=$contentTree;
+                        do {
+                            $subResult = $this->evaluate_tree($subResult, $t, $c["CONTENTS"]);
+                            $t++;
+                            /*if ($c["LEVEL"] > $t) {
+                                $c["CONTENTS"] = $subResult;
+                                $c["LEVEL"] = $c["LEVEL"] - 1;
+                                $result[] = $c;
+                            } else
+                                $result = array_merge($result, $newContents);*/
+                        }while(count($subResult)>1);
+                        $result = array_merge($result, array($c));
+                        continue;
+                    }
+                    $location = "";
+                    $widgetContents = $layoutManager->findWidget($c["NAME"], $location);
+                    $currentPrefix = $this->prefixCounter;
+                    $this->prefixCounter++;
+                    $this->phpPrefix = "v" . $currentPrefix . "_";
+                    $currentWidget = $this->currentWidget;
+                    $c["PHP_PREFIX"]=$this->phpPrefix;
+                    $this->currentWidget = $c;
+                    $this->widgetStack[]=$c;
+                    $this->dataStack[]=$nodePreProcessor;
+                    $oParser = new CWidgetGrammarParser("subwidgetFile", $currentLevel + 1, $c, $layoutManager);
+                    $layoutManager->currentWidget = array("FILE" => $location, "NAME" => $c["NAME"]);
+                    $layout = $oParser->compile($widgetContents, $layoutManager->getLang(), $layoutManager->getTargetProtocol());
+                    if (!$layout) {
+                        echo "ERROR AL COMPILAR " . $this->name . " FILE :" . $location;
+                        exit();
+                    }
+                    $layoutManager->addDependency($location, "widget");
+                    $newHash = null;
+                    $subResult = $c["CONTENTS"];
+                    $jsonParams=$this->parseParams($c);
+                    if($jsonParams)
                     {
-                        include_once($fullName);
-                        $className=str_replace(".php","",$f);
-                        $ins=new $className($this,$this->manager->getTargetProtocol());
-                        $this->manager->preCompilers[]=$ins;
+                        $result[]=$jsonParams;
+                    }
+
+                    $n = $c["LEVEL"];
+                    do {
+                        $subResult = $this->evaluate_tree($subResult,  $n > $c["LEVEL"] ? null : $c["LEVEL"], $n > $c["LEVEL"] ? null : $layout["CONTENTS"]);
+                        $n++;
+                    } while (count($subResult) > 1);
+                    $this->currentWidget = $currentWidget;
+                    array_pop($this->widgetStack);
+                    $nodePreProcessor=array_pop($this->dataStack);
+                    $this->prefixCounter = $currentPrefix;
+                    $this->phpPrefix = "v" . $currentPrefix . "_";
+                    $result = array_merge($result, $subResult);
+                }
+                    break;
+                case "SUBWIDGET": {
+                    if ($c["LEVEL"] != $currentLevel) {
+                        if(isset($c["CONTENTS"])) {
+                            $subTree = $this->evaluate_tree($contentTree, $currentLevel, $c["CONTENTS"]);
+                            if ($c["LEVEL"] > $currentLevel) {
+                                $c["CONTENTS"] = $subTree;
+                                $c["LEVEL"] = $c["LEVEL"] - 1;
+                                $result[] = $c;
+                            } else {
+                                $result = array_merge($result, $subTree);
+                            }
+                        }
+                        continue;
+                    }
+                    if($nodePreProcessor)
+                        $c=$nodePreProcessor->preProcess($c);
+
+                    foreach ($contentTree as $value) {
+                        if ($value["TYPE"] == "SUBWIDGET" && $value["NAME"] == $c["NAME"]) {
+                            if(isset($c["ASSIGN_TO"]) && count($value["CONTENTS"])==1 && $value["CONTENTS"][0]["TYPE"]=="HTML")
+                            {
+                                $varName=$c["ASSIGN_TO"];
+                                if($varName[0]!='$')
+                                    $varName='$'.$varName;
+                                $result[]=array("TYPE"=>"PHP","TEXT"=>$this->remapVariables("<?php ".$varName."='".addslashes($value["CONTENTS"][0]["TEXT"])."';?>"));
+                                continue;
+                            }
+                            $subResult = $this->evaluate_tree($value["CONTENTS"],  $currentLevel, $c["CONTENTS"]);
+                            // Se gestiona el bloque de control.Como el inicio o el fin, por separado, no forman
+                            // un php completo parseable, hay que unirlos, parsearlos, y luego separarlos.
+                            // Hay que tener en cuenta que la zona de control, aunque esta siendo parseada en el widget actual,
+                            // pertenece al widget superior.Es decir, las variables deben ser remapeadas con el prefijo del widget padre.
+                            $mapend=null;
+                            if($value["CONTROL"] && $value["CONTROL"]["start"])
+                            {
+
+                                $start=$value["CONTROL"]["start"];
+
+                                $end=$value["CONTROL"]["end"];
+                                $start=trim($start);
+                                $end=trim($end);
+                                if(substr($start,-1)=="{")
+                                {
+                                    if(substr($end,1)!="}")
+                                        $end="}".$end;
+                                }
+                                // Se obtiene el prefijo del padre del widget actual.El widget actual está en -1, el padre del actual, en -2
+                                $prefix=$this->widgetStack[count($this->widgetStack)-1-$c["LEVEL"]]["PHP_PREFIX"];
+                                $fullC=$start."/* --CONTROL-- */".$end;
+                                $remapped=$this->remapVariables($fullC,$prefix);
+                                $parts=explode("/* --CONTROL-- */",$remapped);
+                                $result[]=array("TYPE"=>"PHP","TEXT"=>$parts[0]);
+                                $mapend=array("TYPE"=>"PHP","TEXT"=>$parts[1]);
+                            }
+                            $result = array_merge($result, $subResult);
+                            if($mapend!=null)
+                                $result[]=$mapend;
+                        }
                     }
                 }
+                    break;
+                case "TAG_CONTENT": {
+                    $result = array_merge($result, $contentTree);
+                }
+                    break;
+                case "PHP": {
+                    $c["TEXT"] = $this->remapVariables($c["TEXT"]);
+                    $result[] = $c;
+                }
+                    break;
+                default: {
+                    if ($c == null)
+                        continue;
+                    $result[] = $c;
+                }
+                    break;
+            }
+
+        }
+        // Se simplifica el resultado
+        $finalResult = array();
+        $currentHTML = null;
+        for ($k = 0; $k < count($result); $k++) {
+            $c = $result[$k];
+            if ($c["TYPE"] == "HTML" || $c["TYPE"] == "PHP") {
+                if ($currentHTML == null)
+                    $currentHTML = $c;
+                else
+                    $currentHTML["TEXT"] .= $c["TEXT"];
+            } else {
+                if ($currentHTML != null)
+                    $finalResult[] = $currentHTML;
+                $currentHTML = null;
+                $finalResult[] = $c;
             }
         }
-        for($k=0;$k<count($this->manager->preCompilers);$k++)
-        {
-            $content=$this->manager->preCompilers[$k]->parse($content);
+        if ($currentHTML != null) {
+            $finalResult[] = $currentHTML;
         }
-        return $content;
 
+        return $finalResult;
+    }
+    function parseParams($element)
+    {
+        if (!isset($element["PARAMS"]) || $element["PARAMS"] == null)
+            return null;
+        $localPrefix = $element["PHP_PREFIX"];
+        $n=count($this->widgetStack);
+        if($n -  2 - $element["LEVEL"] >= 0)
+            $parentPrefix = $this->widgetStack[$n - 2 - $element["LEVEL"]]["PHP_PREFIX"];
+        else
+            $parentPrefix = '';
+
+        $data = json_decode($element["PARAMS"], true);
+        $text="";
+        foreach($data as $key=>$value) {
+            ob_start();
+            var_export($value);
+            $exported=ob_get_clean();
+            $replaced=preg_replace('/[\'"](&{0,1}\$)([^\'"]*)[\'"]/', '\1'.$parentPrefix.'\2',$exported);
+            $text.=('$'.$localPrefix.$key."=".$replaced.";\n");
+        }
+        $code = "<?php " . $text . " ?>";
+        return array("TYPE" => "PHP", "TEXT" => $code);
+    }
+
+    function recurse_tree($tree)
+    {
+
+        for ($k = 0; $k < count($tree); $k++) {
+            $c = $tree[$k];
+            echo "<li><a>" . $c["TYPE"] . ($c["NAME"] ? ":" . $c["NAME"] : "") . "</a>";
+            if (isset($c["CONTENTS"])) {
+                echo "<ul>";
+                $this->recurse_tree($c["CONTENTS"]);
+                echo "</ul>";
+            }
+            echo "</li>";
+        }
+    }
+
+
+    function print_tree($tree)
+    {
+
+        echo '<div class="tree">';
+        echo "<ul>";
+        $this->recurse_tree(array($tree));
+        echo "</ul>";
+        echo "</div>";
+    }
+
+    function parseTree($layout)
+    {
+        $this->prefixCounter = "0";
+        $this->phpState = array("CONTEXT"=>"global");
+        $result=$this->evaluate_tree(array($layout), 0, null);
+        if(!isset($result[0]))
+        {
+            $h=22;
+            $c=55;
+        }
+        return $result[0];
     }
 }
+/*
+    function parsePlugin()
+    {
+        return $this->layoutManager->parsePlugin($this,$this->name,$this->contents);
+        
+        //$pluginTree=new CWidgetGrammarParser("<layoutFile>",$this->level+1,$this,$this->layoutManager);
+        //return $pluginTree->compile($this->contents);
+    }
+    
 
-
-
-
+*/
 class CLayoutManager
 {
     var $dependencies;
@@ -859,7 +751,6 @@ class CLayoutManager
     var $varCounter=0;
     var $preCompilers;
     var $layoutParser;
-    var $layoutLoader;
     static $defaultWidgetPath;
     
     function __construct($basePath,$targetProtocol,$widgetPath=null,$pluginParams=array(),$lang="es")
@@ -867,7 +758,6 @@ class CLayoutManager
         $this->targetProtocol=$targetProtocol;
         if(!$widgetPath)
             $widgetPath=CLayoutManager::$defaultWidgetPath;
-        $this->layoutLoader=new LayoutLoader($this,$widgetPath);
         $this->widgetPath=$widgetPath;
         $this->dependencies=array();
         $this->staticData=array();
@@ -1063,33 +953,63 @@ class CLayoutManager
 
     function processContents($contents)
     {
-        $topContext=new SubwidgetFileContext(SubwidgetFileContext::CONTEXTYPE_TOPLAYOUT);
-        $widgetParser=new CWidgetGrammarParser('layoutFile',1,null,$this,$topContext);
+        $this->layoutStack=array();
+        $widgetParser=new CWidgetGrammarParser('layoutFile',1,null,$this);
+
         $layout=$widgetParser->compile($contents);
-        if($layout && isset($layout["TYPE"]) && $layout["TYPE"]=="SUBWIDGET_FILE")
+        $builder=new LayoutBuilder($this);
+        do {
+            $returned = $builder->parseTree($layout);
+            if (!isset($returned["TEXT"])) {
+                $aa = 1000;
+                $b = 222;
+            }
+            $layout = $returned;
+        }while($layout!=null && !isset($layout["TEXT"]));
+        return isset($returned["TEXT"])?$returned["TEXT"]:"";
+    }
+
+    function findWidgetFile($widgetName,$widgetPath)
+    {
+        if(!$widgetPath)
+            $widgetPath="";
+
+        reset($this->widgetPath);
+        foreach($this->widgetPath as $key=>$value)
         {
-            if(isset($layout["TEXT"]))
-                return $layout["TEXT"];
-            else
+            //echo "TRYING ".$value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION."<br>";
+            if(defined("USE_WORK_WIDGETS"))
             {
-                if(isset($layout["CONTENTS"]))
+                if(is_file($value."/".$widgetPath."/".$widgetName."_work.".WIDGET_EXTENSION))
                 {
-                    $t="";
-                    for($k=0;$k<count($layout["CONTENTS"]);$k++)
-                    {
-                        if(isset($layout["CONTENTS"][$k]["TEXT"]))
-                            $t.=$layout["CONTENTS"][$k]["TEXT"];
-                    }
-                    return $t;
+                    return $value."/".$widgetPath."/".$widgetName."_work.".WIDGET_EXTENSION;
                 }
+            }
+            if(is_file($value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION))
+            {
+                //echo "LOADING ".$value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION;
+                return $value."/".$widgetPath."/".$widgetName.".".WIDGET_EXTENSION;
             }
         }
 
-        var_dump($layout);
-        die("Unexpected output from processing contents file");
+        echo "WIDGET NO ENCONTRADO :: $widgetPath / $widgetName";
+        var_dump($this->widgetPath);
+        die();
     }
-
-
+    function findWidget($widgetName,& $widgetLocation,$widgetPath=null)
+    {
+        $widgetFile=$this->findWidgetFile($widgetName,$widgetPath);
+        if(!$widgetFile)
+        {
+            die("UNKNOWN WIDGET::".$widgetName);
+        }
+        $widgetLocation=$widgetFile;
+        $contents=file_get_contents($widgetFile);
+        $parsed=$this->processPrecompilers($contents);
+        if($parsed!=$contents)
+            file_put_contents($widgetFile,$parsed);
+        return $parsed;
+    }
 
     function isProcessed($widgetName)
     {

@@ -57,10 +57,12 @@ class Registry
         Registry::$saved=true;
 
         unset($_SESSION["Registry"]["states"]);
-        $_SESSION["Registry"]["states"] = Registry::$registry["states"];
-        $_SESSION["Registry"]["SESSION"] = Registry::$registry["session"];
+        if(isset(Registry::$registry["states"]))
+            $_SESSION["Registry"]["states"] = Registry::$registry["states"];
+        if(isset(Registry::$registry["session"]))
+            $_SESSION["Registry"]["SESSION"] = Registry::$registry["session"];
 
-        if (Registry::$registry["newForm"])
+        if (isset(Registry::$registry["newForm"]))
         {
             // Si existian ficheros, hay que eliminarlos de lastAction, ya que no se pueden resetear.
             if(isset($_FILES) &&  !empty($_FILES))

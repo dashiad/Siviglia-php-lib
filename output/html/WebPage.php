@@ -21,7 +21,7 @@ abstract class WebPage extends \lib\model\BaseTypedObject
         $this->_definition=$realClass::$definition;
         $this->name=$pageName;
         $this->site=$site;
-        if($this->_definition["INHERIT_PARAMS"])
+        if(isset($this->_definition["INHERIT_PARAMS"]))
         {
             $i=$this->_definition["INHERIT_PARAMS"];
             $sourceModel=$i["MODEL"];

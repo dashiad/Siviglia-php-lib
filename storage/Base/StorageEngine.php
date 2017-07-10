@@ -1,11 +1,10 @@
 <?php
-namespace lib\storageEngine;
+namespace lib\storage\Base;
 
 use lib\php\ArrayMappedParametersException;
 use lib\php\ParametrizableString;
 use lib\model\BaseException;
 use lib\php\ArrayMappedParameters;
-use lib\storageEngine\KrammerStorageEngine;
 
 class StorageEngineException extends BaseException
 {
@@ -24,14 +23,14 @@ class WritableStorageException extends StorageEngineException
     const TXT_ERR_CANT_WRITE_OBJECT = "Write error";
 }
 
-class GetParamTransform extends ArrayMappedParameters
+class GetParam extends ArrayMappedParameters
 {
     var $field;
-    var $transform=null;
+    var $aggregation=null;
     var $altName=null;
     static $__definition=array(
         "fields"=>array(
-        "transform"=>array("required"=>false),
+        "aggregation"=>array("required"=>false),
         "altName"=>array("required"=>false)
         )
     );
@@ -59,7 +58,6 @@ class StorageEngineParams extends ArrayMappedParameters
     var $pageStart = null;
     var $nElems = null;
     var $defaults = array();
-    var $query = null;
     var $context = null;
 
     static $__definition = array(
@@ -109,11 +107,6 @@ class StorageEngineParams extends ArrayMappedParameters
 
     function merge($variables, $prefix)
     {
-        if ($variables == "") {
-            $h = 11;
-            var_dump($variables);
-        }
-
         foreach ($variables as $key => $value) {
             $this->params[$prefix . "." . $key] = $value;
         }
@@ -148,7 +141,6 @@ class StorageEngineGetParams extends StorageEngineParams
             "sorting"=>array("required"=>false)
         )
     );
-
 }
 
 abstract class StorageEngine
@@ -158,15 +150,6 @@ abstract class StorageEngine
     var $queries;
 
     abstract function get(StorageEngineGetParams $spec);
-
-    function getQuery($name)
-    {
-        if (!isset($this->queries[$name])) {
-            throw new StorageEngineException(StorageEngineException::ERR_UNKNOWN_QUERY, array("query" => $name, "storageName" => $this->name));
-        }
-
-        return $this->queries[$name];
-    }
 
     function setName($name)
     {

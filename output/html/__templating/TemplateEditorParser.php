@@ -1,6 +1,43 @@
 <?php
+/*
 
-class CLayoutHTMLParserManager
+  Siviglia Framework templating engine
+
+  BSD License
+
+  Copyright (c) 2012, Jose Maria Rodriguez Millan
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification, are permitted provided that 
+  the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list of conditions and 
+    the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and 
+    the following disclaimer in the documentation and/or other materials provided with the distribution.
+  * Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or 
+    promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. 
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS 
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Please, send bugs, feature requests or comments to: 
+ 
+dashiad at hotmail.com 
+ 
+You can find more information about this class at: 
+ 
+http://xphperiments.blogspot.com 
+
+*/
+class CLayoutEditorParserManager
 {
     var $varMap;
     var $name;
@@ -17,8 +54,7 @@ class CLayoutHTMLParserManager
     {    
         $result="";    
         $staticData=$layoutManager->staticData;
-
-
+        
         foreach($staticData as $key=>$value)
         {
             foreach($value as $key1=>$value1)
@@ -33,11 +69,6 @@ class CLayoutHTMLParserManager
         for($k=0;$k<$nResults;$k++)
         {
             $resultClass=get_class($layout->contents[$k]);
-            if($resultClass=="CLayoutHTMLParserManager")
-            {
-                $h=22;
-                $q=11;
-            }
             $parserClass=$resultClass."Parser";
             $oNodeParser=new $parserClass($layout->contents[$k]);            
             $result.=$oNodeParser->process($this);
@@ -48,7 +79,7 @@ class CLayoutHTMLParserManager
 }  
 
 
-abstract class CLayoutElementParser
+abstract class CLayoutEditorElementParser
 {
     var $element;
 
@@ -62,17 +93,14 @@ abstract class CLayoutElementParser
     }
     function set($contents)
     {
-        if(!is_array($contents))
-        {
-            $h=1;
-        }
+
         $nContents=count($contents);
         for($k=0;$k<$nContents;$k++)
         {
             if($contents[$k]==NULL)
                 continue;
-            $cName=get_class($contents[$k])."Parser";
-            /*if($cName=="CLayoutElementParserParser")
+            $cName=get_class($contents[$k])."ElementParser";
+            /*if($cName=="CLayoutEditorElementParserParser")
             {
                 var_dump($this->element);
             }*/
@@ -88,42 +116,36 @@ abstract class CLayoutElementParser
     }
 }
 
-class CAssignBlockParser extends CLayoutElementParser{
+class CAssignBlockParser extends CLayoutEditorElementParser{
     function process($referenceNode)
     {
-        return $this->element->preparedContents;
+        return '';
     }
 }
 
 
 
-class CPHPElementParser extends CLayoutElementParser{
+class CPHPElementParser extends CLayoutEditorElementParser{
     function process($referenceNode)
     {
-        return $this->element->preparedContents;
+        return '';
         
     }
 }
 
-class CHTMLElementParser extends CLayoutElementParser{
+class CHTMLElementParser extends CLayoutEditorElementParser{
     function process($referenceNode)
     {
         return $this->element->preparedContents;
     }
 }
 
-class CDataSourceElementParser extends CLayoutElementParser{
-    function process($referenceNode)
-    {
-        return "<?php echo \$globalPath->getPath('".str_replace(array("{%","%}"),array('',''), $this->element->preparedContents)."',\$globalContext);?>";
-    }
-}
 
-class CContentTagParser extends CLayoutElementParser{
+class CContentTagParser extends CLayoutEditorElementParser{
     function process($referenceNode)
     {
            if($this->element->params)
-        {
+            {
             // Si existen parametros, se van a mapear los parametros que nos han pasado, a variables PHP.
             // Para ello, hay que conocer el prefijo que tiene el widget actual, y el prefijo que tenia
             // el widget donde, en su caso, fue declarado el parametro.
@@ -180,7 +202,7 @@ class CContentTagParser extends CLayoutElementParser{
     }
 }
 
-class CWidgetItemParser extends CLayoutElementParser {
+class CWidgetItemParser extends CLayoutEditorElementParser {
 
     var $definition;
     var $params;
@@ -196,7 +218,7 @@ class CWidgetItemParser extends CLayoutElementParser {
         {
             $this->params=& $node->params;
         }
-        CLayoutElementParser::__construct($node);
+        CLayoutEditorElementParser::__construct($node);
     }
     function process($referenceNode)
     {
@@ -227,7 +249,6 @@ class CWidgetParser extends CWidgetItemParser {
     }
     function process($referenceNode)
     {
-        $content="";
         if($this->element->startBlockControl)
             $content=$this->element->startBlockControl->preparedContents;
         $content.=$this->__process($referenceNode);
@@ -329,11 +350,10 @@ class CSubWidgetParser extends CWidgetItemParser {
                 //$parentPrefix=$this->element->parentWidget->getPrefix();
                     $parentPrefix=$this->element->parentWidget->parentWidget->getPrefix();
             }
-            //if($this->element->parentTag)
-            //{
-            //    $localPrefix=$this->element->parentTag->parentWidget->getPrefix();
-            //}
-            //else
+            if($this->element->parentTag)
+            
+                $localPrefix=$this->element->parentTag->parentWidget->getPrefix();
+            else            
                 $localPrefix=$this->element->parentWidget->getPrefix();
             $text="<?php \n";
             foreach($this->element->params as $key=>$value)

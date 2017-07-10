@@ -17,9 +17,6 @@ class EnumType extends BaseType
           {
               if(!in_array($val,$this->definition["VALUES"]))
               {
-                  _d($this->definition);
-                  _d($val);
-                  debug_trace();
                   throw new BaseTypeException(BaseTypeException::ERR_INVALID);
               }
                
