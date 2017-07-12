@@ -7,7 +7,6 @@
  */
 
 namespace lib\project;
-use backoffice\SitesException;
 
 include_once(LIBPATH."/project/PathMap.php");
 include_once(LIBPATH."/project/Site.php");
