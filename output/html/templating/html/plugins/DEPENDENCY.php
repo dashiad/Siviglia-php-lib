@@ -229,8 +229,8 @@ tras cada regeneracion de cache, puede ocurrir lo siguiente:
 		
 			if(!isset(DEPENDENCY_BUNDLE::$bundlePaths[$this->basePath]))
 			{
-				$baseText="<?php \$__serialized__bundle__".$this->name."=file_get_contents('".$this->basePath."/bundle_".$this->name.".srl');?>";
-				file_put_contents($this->basePath."/bundle_".$this->name.".srl",$cTime);	
+				$baseText="<?php \$__serialized__bundle__".$this->name."=file_get_contents('".$this->documentRoot."/".$this->basePath."/bundle_".$this->name.".srl');?>";
+				file_put_contents($this->documentRoot."/".$this->basePath."/bundle_".$this->name.".srl",$cTime);	
 				DEPENDENCY_BUNDLE::$bundlePaths[$this->basePath]="__serialized__bundle__".$this->name;
 			}
 			$includeCode="<?php echo \$__serialized__bundle__".$this->name.";?>";
