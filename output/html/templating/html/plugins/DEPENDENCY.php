@@ -111,11 +111,13 @@ class DEPENDENCY_BUNDLE {
                     //    $this->usedFiles[$cur[1][2].$key]=1;
 
                     // Se añade el comentario de inicio.
-                    $text.=$cur[1][0];
+                    if(count($cur[1]) > 1)
+                        $text.=$cur[1][0];
+
                     if($cur[0]!==null){
                         if(!defined("DEVELOPMENT") || DEVELOPMENT==0)
                         // Codigo inline;
-                        $text.=$cur[0];
+                            $text.=$cur[0];
                         else
                         {
                             switch($key)
