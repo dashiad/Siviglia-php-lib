@@ -359,7 +359,7 @@ class OracleStorageConnector extends TreeBased
     function getObject($path)
     {
         $path=$this->fixPath($path);
-        $result=$this->makeRequest("GET",$path);
+        $result=$this->makeRequest("GET",$path."?nc=".time());
         return $result;
     }
     function getObjectMetadata($path)
